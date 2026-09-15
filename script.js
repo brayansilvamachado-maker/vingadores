@@ -3,7 +3,8 @@ const heroisDisponiveis = [
         id: "homem_de_ferro",
         nome: "Homem de Ferro",
         hp: 100,
-        classe: "Ataque",
+        preco: 0,
+        comprado: true,
         golpes: [
             { nome: "Soco Repulsor", custo: 2, dano: 15, efeito: null },
             { nome: "Escudo Fotônico", custo: 3, dano: 0, efeito: "defesa" },
@@ -14,7 +15,8 @@ const heroisDisponiveis = [
         id: "capitao_america",
         nome: "Capitão América",
         hp: 130,
-        classe: "Defesa",
+        preco: 0,
+        comprado: true,
         golpes: [
             { nome: "Golpe de Escudo", custo: 2, dano: 12, efeito: null },
             { nome: "Postura Defensiva", custo: 3, dano: 0, efeito: "defesa" },
@@ -25,7 +27,8 @@ const heroisDisponiveis = [
         id: "homem_aranha",
         nome: "Homem-Aranha",
         hp: 90,
-        classe: "Velocidade",
+        preco: 0,
+        comprado: true,
         golpes: [
             { nome: "Chute Teia", custo: 2, dano: 18, efeito: null },
             { nome: "Teia Lenta", custo: 3, dano: 10, efeito: "lentidao" },
@@ -36,7 +39,8 @@ const heroisDisponiveis = [
         id: "thor",
         nome: "Thor",
         hp: 120,
-        classe: "Força",
+        preco: 80,
+        comprado: false,
         golpes: [
             { nome: "Martelada", custo: 2, dano: 16, efeito: null },
             { nome: "Bênção de Asgard", custo: 3, dano: 0, efeito: "cura" },
@@ -47,15 +51,41 @@ const heroisDisponiveis = [
         id: "viuva_negra",
         nome: "Viúva Negra",
         hp: 85,
-        classe: "Agilidade",
+        preco: 50,
+        comprado: false,
         golpes: [
             { nome: "Ataque Furtivo", custo: 1, dano: 10, efeito: null },
             { nome: "Bastões Elétricos", custo: 3, dano: 15, efeito: "lentidao" },
             { nome: "Picada da Viúva", custo: 5, dano: 48, efeito: null }
         ]
+    },
+    {
+        id: "hulk",
+        nome: "Hulk",
+        hp: 160,
+        preco: 100,
+        comprado: false,
+        golpes: [
+            { nome: "Soco Esmaga", custo: 2, dano: 20, efeito: null },
+            { nome: "Grito de Fúria", custo: 3, dano: 0, efeito: "defesa" },
+            { nome: "Esmaga Hulk!", custo: 6, dano: 60, efeito: null }
+        ]
+    },
+    {
+        id: "doutor_estranho",
+        nome: "Doutor Estranho",
+        hp: 95,
+        preco: 90,
+        comprado: false,
+        golpes: [
+            { nome: "Raios de Misticismo", custo: 2, dano: 14, efeito: null },
+            { nome: "Olho de Agamotto", custo: 3, dano: 5, efeito: "lentidao" },
+            { nome: "Invocação Mística", custo: 4, dano: 0, efeito: "cura" }
+        ]
     }
 ];
 
+let moedas = 100;
 let meuTime = [];
 let heroiAtualIndex = 0;
 let inimigo = { nome: "Ultron", maxHp: 150, currentHp: 150, defesaAtiva: false, lento: false };
@@ -63,19 +93,75 @@ let inimigo = { nome: "Ultron", maxHp: 150, currentHp: 150, defesaAtiva: false, 
 let currentEnergy = 0;
 const maxEnergy = 10;
 let chargeSpeed = 1.2;
+let emLoja = false;
+
+function atualizarMoedas() {
+    document.getElementById("coin-count").innerText = moedas;
+}
+
+function toggleLoja() {
+    emLoja = !emLoja;
+    const shopScreen = document.getElementById("shop-screen");
+    const selectionScreen = document.getElementById("selection-screen");
+    const btnShop = document.getElementById("btn-toggle-shop");
+
+    if (emLoja) {
+        shopScreen.classList.remove("hidden");
+        selectionScreen.classList.add("hidden");
+        btnShop.innerText = "⚔️ Voltar";
+        renderizarLoja();
+    } else {
+        shopScreen.classList.add("hidden");
+        selectionScreen.classList.remove("hidden");
+        btnShop.innerText = "🛒 Loja";
+        renderizarSelecao();
+    }
+}
+
+function renderizarLoja() {
+    const container = document.getElementById("shop-container");
+    container.innerHTML = "";
+
+    heroisDisponiveis.forEach(heroi => {
+        const card = document.createElement("div");
+        card.className = "starter-card";
+        
+        let botaoHtml = heroi.comprado 
+            ? `<button class="btn-buy" disabled>ADQUIRIDO</button>`
+            : `<button class="btn-buy" onclick="comprarHeroi('${heroi.id}')">COMPRAR (🪙${heroi.preco})</button>`;
+
+        card.innerHTML = `
+            <h3>${heroi.nome}</h3>
+            <p><strong>HP:</strong> ${heroi.hp}</p>
+            ${botaoHtml}
+        `;
+        container.appendChild(card);
+    });
+}
+
+function comprarHeroi(id) {
+    const heroi = heroisDisponiveis.find(h => h.id === id);
+    if (heroi && !heroi.comprado && moedas >= heroi.preco) {
+        moedas -= heroi.preco;
+        heroi.comprado = true;
+        atualizarMoedas();
+        renderizarLoja();
+    }
+}
 
 function renderizarSelecao() {
     const container = document.getElementById("starter-heroes-container");
     container.innerHTML = "";
 
-    heroisDisponiveis.forEach(heroi => {
+    const heroisDesbloqueados = heroisDisponiveis.filter(h => h.comprado);
+
+    heroisDesbloqueados.forEach(heroi => {
         const estaSelecionado = meuTime.some(h => h.id === heroi.id);
         const card = document.createElement("div");
         card.className = `starter-card ${estaSelecionado ? 'selected' : ''}`;
         card.innerHTML = `
             <h3>${heroi.nome}</h3>
             <p><strong>HP:</strong> ${heroi.hp}</p>
-            <p><strong>Tipo:</strong> ${heroi.classe}</p>
         `;
         card.onclick = () => alternarSelecao(heroi);
         container.appendChild(card);
@@ -102,6 +188,7 @@ function alternarSelecao(heroi) {
 function iniciarBatalha() {
     document.getElementById("selection-screen").classList.add("hidden");
     document.getElementById("battle-screen").classList.remove("hidden");
+    document.getElementById("btn-toggle-shop").classList.add("hidden");
 
     criarBlocosEnergia();
     atualizarHeroiEmCampo();
@@ -152,7 +239,6 @@ function criarBlocosEnergia() {
 }
 
 function update() {
-    // Aplica velocidade reduzida se estiver sob efeito de lentidão
     let vel = inimigo.lento ? chargeSpeed * 0.5 : chargeSpeed;
 
     if (currentEnergy < maxEnergy) {
@@ -189,9 +275,9 @@ function setupMoves() {
         btn.className = "btn-move";
         
         let detalheEfeito = "";
-        if (move.efeito === "defesa") detalheEfeito = " [+Defesa]";
+        if (move.efeito === "defesa") detalheEfeito = " [+Def]";
         if (move.efeito === "cura") detalheEfeito = " [+Cura]";
-        if (move.efeito === "lentidao") detalheEfeito = " [Lentidão]";
+        if (move.efeito === "lentidao") detalheEfeito = " [Lento]";
 
         btn.innerText = `${move.nome}${detalheEfeito}\n(${move.custo} blocos)`;
         btn.onclick = () => atracar(move);
@@ -204,17 +290,15 @@ function atracar(move) {
         currentEnergy -= move.custo;
         const heroi = meuTime[heroiAtualIndex];
 
-        // Lógica de Dano e Defesa do Inimigo
         let danoFinal = move.dano;
         if (inimigo.defesaAtiva && danoFinal > 0) {
             danoFinal = Math.floor(danoFinal / 2);
-            inimigo.defesaAtiva = false; // Defesa consome após o ataque
+            inimigo.defesaAtiva = false;
         }
 
         inimigo.currentHp -= danoFinal;
         if (inimigo.currentHp < 0) inimigo.currentHp = 0;
 
-        // Lógica de Efeitos de Status
         if (move.efeito === "defesa") {
             heroi.defesaAtiva = true;
         } else if (move.efeito === "cura") {
@@ -222,7 +306,7 @@ function atracar(move) {
             if (heroi.currentHp > heroi.hp) heroi.currentHp = heroi.hp;
         } else if (move.efeito === "lentidao") {
             inimigo.lento = true;
-            setTimeout(() => { inimigo.lento = false; atualizarBadges(); }, 5000); // Dura 5 segundos
+            setTimeout(() => { inimigo.lento = false; atualizarBadges(); }, 5000);
         }
 
         atualizarVidaPlayer();
@@ -230,7 +314,9 @@ function atracar(move) {
         atualizarBadges();
 
         if (inimigo.currentHp === 0) {
-            alert("Você venceu a batalha!");
+            moedas += 50;
+            atualizarMoedas();
+            alert("Você venceu a batalha e ganhou 50 moedas!");
         }
     }
 }
@@ -262,30 +348,5 @@ function atualizarVidaInimigo() {
     document.getElementById("enemy-hp-text").innerText = `${inimigo.currentHp} / ${inimigo.maxHp} HP`;
 }
 
+atualizarMoedas();
 renderizarSelecao();
-
-// Exemplo: Adicionando o Hulk e o Doutor Estranho
-{
-    id: "hulk",
-    nome: "Hulk",
-    hp: 160,
-    preco: 100,
-    comprado: false,
-    golpes: [
-        { nome: "Soco Esmaga", custo: 2, dano: 20, efeito: null },
-        { nome: "Grito de Fúria", custo: 3, dano: 0, efeito: "defesa" },
-        { nome: "Esmaga Hulk!", custo: 6, dano: 60, efeito: null }
-    ]
-},
-{
-    id: "doutor_estranho",
-    nome: "Doutor Estranho",
-    hp: 95,
-    preco: 90,
-    comprado: false,
-    golpes: [
-        { nome: "Raios de Misticismo", custo: 2, dano: 14, efeito: null },
-        { nome: "Olho de Agamotto", custo: 3, dano: 5, efeito: "lentidao" },
-        { nome: "Invocação Mística", custo: 4, dano: 0, efeito: "cura" }
-    ]
-}

@@ -263,3 +263,29 @@ function atualizarVidaInimigo() {
 }
 
 renderizarSelecao();
+
+// Exemplo: Adicionando o Hulk e o Doutor Estranho
+{
+    id: "hulk",
+    nome: "Hulk",
+    hp: 160,
+    preco: 100,
+    comprado: false,
+    golpes: [
+        { nome: "Soco Esmaga", custo: 2, dano: 20, efeito: null },
+        { nome: "Grito de Fúria", custo: 3, dano: 0, efeito: "defesa" },
+        { nome: "Esmaga Hulk!", custo: 6, dano: 60, efeito: null }
+    ]
+},
+{
+    id: "doutor_estranho",
+    nome: "Doutor Estranho",
+    hp: 95,
+    preco: 90,
+    comprado: false,
+    golpes: [
+        { nome: "Raios de Misticismo", custo: 2, dano: 14, efeito: null },
+        { nome: "Olho de Agamotto", custo: 3, dano: 5, efeito: "lentidao" },
+        { nome: "Invocação Mística", custo: 4, dano: 0, efeito: "cura" }
+    ]
+}

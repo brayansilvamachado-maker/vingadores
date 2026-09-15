@@ -216,3 +216,15 @@ body {
     cursor: not-allowed;
     opacity: 0.5;
 }
+
+/* Alterando o fundo da tela para um tom mais estilizado dos Vingadores */
+body {
+    background-color: #0d1b2a; /* Azul escuro tecnológico */
+    color: white;
+}
+
+/* Alterando o painel principal para a Torre dos Vingadores */
+.screen {
+    background: #1b263b;
+    border: 4px solid #00b4d8; /* Azul metálico em vez de vermelho */
+}

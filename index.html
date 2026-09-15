@@ -1,25 +1,43 @@
-# 1. INFORMAÇÃO DE ENTRADA (O que o cliente digita)
-sabor_escolhido = "Calabresa" # Experimente mudar para "Frango" para testar
-forma_pagamento = "Dinheiro"
-valor_pago = 50.00
-preco_pizza = 42.00
-# Cardápio simples do nosso sistema
-cardapio = ["Calabresa", "Mussarela", "Portuguesa"]
-# 2. COMPORTAMENTO E REGRAS (O processamento do Back-End)
-pedido_valido = False
-mensagem_resposta = ""
-# Regra 1: Verificar se o sabor existe no cardápio
-if sabor_escolhido in cardapio:
-pedido_valido = True
-else:
-mensagem_resposta = "Erro: Esse sabor não está disponível hoje."
-# Regra 2 e 3: Se o sabor existe, processar o pagamento e enviar para a cozinha
-if pedido_valido:
-if forma_pagamento == "Dinheiro" and valor_pago > preco_pizza:
-troco = valor_pago - preco_pizza
-# 3. COMUNICAÇÃO DE SAÍDA (Resposta de sucesso com troco)
-mensagem_resposta = f"Sucesso! Pedido enviado para a cozinha. Seu troco é
-de R$ {troco:.2f}."
-else:
-# 3. COMUNICAÇÃO DE SAÍDA (Resposta de sucesso sem troco)
-mensagem_resposta = "Sucesso! Pedido enviado para a cozinha."
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Titãs: Marvel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="battle-screen">
+        <!-- ÁREA DOS HERÓIS NA BATALHA -->
+        <div class="arena">
+            <div class="hero-card" id="player-card">
+                <h2 id="player-name">Homem de Ferro</h2>
+                <div class="hp-bar"><div id="player-hp-fill"></div></div>
+                <p id="player-hp-text">100 / 100 HP</p>
+            </div>
+
+            <div class="hero-card" id="enemy-card">
+                <h2 id="enemy-name">Ultron</h2>
+                <div class="hp-bar"><div id="enemy-hp-fill"></div></div>
+                <p id="enemy-hp-text">100 / 100 HP</p>
+            </div>
+        </div>
+
+        <!-- BARRA DE ENERGIA (ESTILO MINI TITÃS) -->
+        <div class="energy-container">
+            <p>ENERGIA DE COMBATE</p>
+            <div class="energy-bar">
+                <div id="energy-fill"></div>
+            </div>
+        </div>
+
+        <!-- PAINEL DE GOLPES -->
+        <div id="moves-container" class="moves-panel">
+            <!-- Os botões de ataque serão gerados pelo JavaScript -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

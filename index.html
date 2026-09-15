@@ -8,16 +8,24 @@
 </head>
 <body>
 
-    <!-- TELA DE SELEÇÃO DO INICIAL -->
+    <!-- TELA DE SELEÇÃO DE EQUIPE (3 HERÓIS) -->
     <div id="selection-screen" class="screen">
-        <h1>ESCOLHA SEU HERÓI INICIAL</h1>
-        <p>Selecione quem liderará sua equipe!</p>
+        <h1>MONTE SEU TIME (ESCOLHA 3)</h1>
+        <p id="select-subtitle">Clique nos heróis para adicionar à sua equipe</p>
         
         <div id="starter-heroes-container" class="cards-container"></div>
+        
+        <button id="btn-start-battle" class="btn-start hidden" onclick="iniciarBatalha()">COMEÇAR BATALHA</button>
     </div>
 
     <!-- TELA DE BATALHA -->
     <div id="battle-screen" class="screen hidden">
+        <!-- PAINEL DE TROCA DE PERSONAGENS (MINI TITÃS) -->
+        <div class="team-bench-container">
+            <p>SUA EQUIPE (CLIQUE PARA TROCAR)</p>
+            <div id="team-bench" class="team-bench"></div>
+        </div>
+
         <div class="arena">
             <div class="hero-card" id="player-card">
                 <h2 id="player-name">Herói</h2>
@@ -32,12 +40,10 @@
             </div>
         </div>
 
-        <!-- BARRA DE ENERGIA EM BLOCOS (ESTILO MINI TITÃS) -->
+        <!-- BARRA DE ENERGIA EM BLOCOS -->
         <div class="energy-container">
             <p>ENERGIA DE COMBATE</p>
-            <div id="energy-blocks-container" class="energy-blocks">
-                <!-- 10 blocos gerados via JavaScript -->
-            </div>
+            <div id="energy-blocks-container" class="energy-blocks"></div>
         </div>
 
         <div id="moves-container" class="moves-panel"></div>

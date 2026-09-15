@@ -177,6 +177,7 @@ body {
     padding: 12px;
     border-radius: 8px;
     width: 48%;
+    transition: transform 0.2s;
 }
 
 .hp-bar {
@@ -258,4 +259,27 @@ body {
     background: #555;
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+/* ANIMAÇÕES DE COMBATE */
+@keyframes atacarAvanco {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(40px) scale(1.05); filter: drop-shadow(0 0 10px #00d2ff); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes levarDano {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); filter: brightness(2); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.animar-ataque {
+  animation: atacarAvanco 0.4s ease-in-out;
+}
+
+.animar-dano {
+  animation: levarDano 0.4s ease-in-out;
 }

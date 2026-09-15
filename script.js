@@ -5,8 +5,6 @@ const heroisDisponiveis = [
         hp: 110,
         preco: 0,
         comprado: true,
-        // Pose inspirada na postura do Ciborgue, ajustada para o disparo manual
-        pose: "Postura Ciborgue (Disparo de Mão)",
         golpes: [
             { nome: "Disparo da Mão", custo: 2, dano: 16, efeito: null },
             { nome: "Rede de Contenção", custo: 3, dano: 10, efeito: "lentidao" },
@@ -90,7 +88,9 @@ const heroisDisponiveis = [
 let moedas = 100;
 let meuTime = [];
 let heroiAtualIndex = 0;
-let inimigo = { nome: "Ultron", maxHp: 150, currentHp: 150, defesaAtiva: false, lento: false };
+
+// Thanos configurado como Chefão
+let inimigo = { nome: "Thanos", maxHp: 250, currentHp: 250, defesaAtiva: false, lento: false };
 
 let currentEnergy = 0;
 const maxEnergy = 10;
@@ -292,6 +292,23 @@ function atracar(move) {
         currentEnergy -= move.custo;
         const heroi = meuTime[heroiAtualIndex];
 
+        // Animação visual de ataque e dano
+        const playerCard = document.getElementById("player-card");
+        const enemyCard = document.getElementById("enemy-card");
+
+        if (playerCard) {
+            playerCard.classList.add("animar-ataque");
+            setTimeout(() => playerCard.classList.remove("animar-ataque"), 400);
+        }
+
+        if (enemyCard) {
+            setTimeout(() => {
+                enemyCard.classList.add("animar-dano");
+                setTimeout(() => enemyCard.classList.remove("animar-dano"), 400);
+            }, 150);
+        }
+
+        // Cálculo do dano
         let danoFinal = move.dano;
         if (inimigo.defesaAtiva && danoFinal > 0) {
             danoFinal = Math.floor(danoFinal / 2);
@@ -316,9 +333,9 @@ function atracar(move) {
         atualizarBadges();
 
         if (inimigo.currentHp === 0) {
-            moedas += 50;
+            moedas += 100;
             atualizarMoedas();
-            alert("Você venceu a batalha e ganhou 50 moedas!");
+            alert("Você derrotou Thanos e ganhou 100 moedas!");
         }
     }
 }

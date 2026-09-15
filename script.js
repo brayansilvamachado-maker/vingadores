@@ -2,13 +2,15 @@ const heroisDisponiveis = [
     {
         id: "homem_de_ferro",
         nome: "Homem de Ferro",
-        hp: 100,
+        hp: 110,
         preco: 0,
         comprado: true,
+        // Pose inspirada na postura do Ciborgue, ajustada para o disparo manual
+        pose: "Postura Ciborgue (Disparo de Mão)",
         golpes: [
-            { nome: "Soco Repulsor", custo: 2, dano: 15, efeito: null },
-            { nome: "Escudo Fotônico", custo: 3, dano: 0, efeito: "defesa" },
-            { nome: "Unibeam", custo: 6, dano: 50, efeito: null }
+            { nome: "Disparo da Mão", custo: 2, dano: 16, efeito: null },
+            { nome: "Rede de Contenção", custo: 3, dano: 10, efeito: "lentidao" },
+            { nome: "Super Carga de Plasma", custo: 5, dano: 50, efeito: null }
         ]
     },
     {

@@ -8,11 +8,19 @@
 </head>
 <body>
 
-    <div id="battle-screen">
-        <!-- ÁREA DOS HERÓIS NA BATALHA -->
+    <!-- TELA DE SELEÇÃO DO INICIAL -->
+    <div id="selection-screen" class="screen">
+        <h1>ESCOLHA SEU HERÓI INICIAL</h1>
+        <p>Selecione quem liderará sua equipe!</p>
+        
+        <div id="starter-heroes-container" class="cards-container"></div>
+    </div>
+
+    <!-- TELA DE BATALHA -->
+    <div id="battle-screen" class="screen hidden">
         <div class="arena">
             <div class="hero-card" id="player-card">
-                <h2 id="player-name">Homem de Ferro</h2>
+                <h2 id="player-name">Herói</h2>
                 <div class="hp-bar"><div id="player-hp-fill"></div></div>
                 <p id="player-hp-text">100 / 100 HP</p>
             </div>
@@ -20,22 +28,19 @@
             <div class="hero-card" id="enemy-card">
                 <h2 id="enemy-name">Ultron</h2>
                 <div class="hp-bar"><div id="enemy-hp-fill"></div></div>
-                <p id="enemy-hp-text">100 / 100 HP</p>
+                <p id="enemy-hp-text">120 / 120 HP</p>
             </div>
         </div>
 
-        <!-- BARRA DE ENERGIA (ESTILO MINI TITÃS) -->
+        <!-- BARRA DE ENERGIA EM BLOCOS (ESTILO MINI TITÃS) -->
         <div class="energy-container">
             <p>ENERGIA DE COMBATE</p>
-            <div class="energy-bar">
-                <div id="energy-fill"></div>
+            <div id="energy-blocks-container" class="energy-blocks">
+                <!-- 10 blocos gerados via JavaScript -->
             </div>
         </div>
 
-        <!-- PAINEL DE GOLPES -->
-        <div id="moves-container" class="moves-panel">
-            <!-- Os botões de ataque serão gerados pelo JavaScript -->
-        </div>
+        <div id="moves-container" class="moves-panel"></div>
     </div>
 
     <script src="script.js"></script>

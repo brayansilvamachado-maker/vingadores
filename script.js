@@ -152,6 +152,21 @@ function comprarHeroi(id) {
 }
 
 function renderizarSelecao() {
+    // Atualiza as plataformas circulares estilo Teeny Titans
+    for (let i = 0; i < 3; i++) {
+        const slot = document.getElementById(`slot-${i}`);
+        if (slot) {
+            if (meuTime[i]) {
+                slot.innerText = meuTime[i].nome;
+                slot.classList.add("filled");
+            } else {
+                slot.innerText = "+ Escolher";
+                slot.classList.remove("filled");
+            }
+        }
+    }
+
+    // Renderiza a lista de heróis
     const container = document.getElementById("starter-heroes-container");
     container.innerHTML = "";
 

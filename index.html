@@ -22,9 +22,19 @@
 
     <!-- TELA DE SELEÇÃO DE TIME -->
     <div id="selection-screen" class="screen">
-        <h2>Escolha 3 Heróis para o seu Time</h2>
+        <h2>Escolha seu Time de Combatentes</h2>
+        
+        <!-- Base estilo Teeny Titans com 3 plataformas circulares -->
+        <div class="podium-base">
+            <div class="podium-slot" id="slot-0"><span class="slot-text">+ Escolher</span></div>
+            <div class="podium-slot center-slot" id="slot-1"><span class="slot-text">+ Escolher</span></div>
+            <div class="podium-slot" id="slot-2"><span class="slot-text">+ Escolher</span></div>
+        </div>
+
+        <button id="btn-start-battle" class="btn-start hidden" onclick="iniciarBatalha()">GO!</button>
+
+        <p class="select-label">Seus Bonecos:</p>
         <div id="starter-heroes-container" class="cards-container"></div>
-        <button id="btn-start-battle" class="btn-start hidden" onclick="iniciarBatalha()">⚔️ Iniciar Batalha</button>
     </div>
 
     <!-- TELA DE BATALHA -->
@@ -41,7 +51,7 @@
             <div id="player-card" class="hero-card">
                 <h3 id="player-name">Homem de Ferro</h3>
                 <div class="hp-bar"><div id="player-hp-fill"></div></div>
-                <span id="player-hp-text">100 / 100 HP</span>
+                <span id="player-hp-text">110 / 110 HP</span>
                 <div id="player-status-text" class="status-badge"></div>
             </div>
 

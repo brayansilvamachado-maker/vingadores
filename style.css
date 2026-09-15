@@ -133,6 +133,7 @@ body {
     padding: 12px;
     border-radius: 8px;
     width: 48%;
+    position: relative;
 }
 
 .hp-bar {
@@ -149,6 +150,14 @@ body {
     height: 100%;
     background: #2ecc71;
     transition: width 0.3s;
+}
+
+.status-badge {
+    font-size: 11px;
+    color: #f1c40f;
+    font-weight: bold;
+    margin-top: 4px;
+    min-height: 15px;
 }
 
 .energy-container {
@@ -199,7 +208,7 @@ body {
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .btn-move:disabled {

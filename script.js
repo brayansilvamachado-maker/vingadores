@@ -5,9 +5,9 @@ const heroisDisponiveis = [
         hp: 100,
         classe: "Ataque",
         golpes: [
-            { nome: "Soco Repulsor", custo: 2, dano: 15 },
-            { nome: "Raio Laser", custo: 4, dano: 30 },
-            { nome: "Unibeam", custo: 6, dano: 50 }
+            { nome: "Soco Repulsor", custo: 2, dano: 15, efeito: null },
+            { nome: "Escudo Fotônico", custo: 3, dano: 0, efeito: "defesa" },
+            { nome: "Unibeam", custo: 6, dano: 50, efeito: null }
         ]
     },
     {
@@ -16,9 +16,9 @@ const heroisDisponiveis = [
         hp: 130,
         classe: "Defesa",
         golpes: [
-            { nome: "Golpe de Escudo", custo: 2, dano: 12 },
-            { nome: "Investida", custo: 3, dano: 22 },
-            { nome: "Lançar Escudo", custo: 5, dano: 40 }
+            { nome: "Golpe de Escudo", custo: 2, dano: 12, efeito: null },
+            { nome: "Postura Defensiva", custo: 3, dano: 0, efeito: "defesa" },
+            { nome: "Lançar Escudo", custo: 5, dano: 40, efeito: null }
         ]
     },
     {
@@ -27,9 +27,9 @@ const heroisDisponiveis = [
         hp: 90,
         classe: "Velocidade",
         golpes: [
-            { nome: "Chute Teia", custo: 2, dano: 18 },
-            { nome: "Disparo Duplo", custo: 3, dano: 25 },
-            { nome: "Combo de Teias", custo: 5, dano: 45 }
+            { nome: "Chute Teia", custo: 2, dano: 18, efeito: null },
+            { nome: "Teia Lenta", custo: 3, dano: 10, efeito: "lentidao" },
+            { nome: "Combo de Teias", custo: 5, dano: 45, efeito: null }
         ]
     },
     {
@@ -38,9 +38,9 @@ const heroisDisponiveis = [
         hp: 120,
         classe: "Força",
         golpes: [
-            { nome: "Martelada", custo: 2, dano: 16 },
-            { nome: "Trovão", custo: 4, dano: 35 },
-            { nome: "Ira de Asgard", custo: 6, dano: 55 }
+            { nome: "Martelada", custo: 2, dano: 16, efeito: null },
+            { nome: "Bênção de Asgard", custo: 3, dano: 0, efeito: "cura" },
+            { nome: "Ira de Asgard", custo: 6, dano: 55, efeito: null }
         ]
     },
     {
@@ -49,20 +49,20 @@ const heroisDisponiveis = [
         hp: 85,
         classe: "Agilidade",
         golpes: [
-            { nome: "Ataque Furtivo", custo: 1, dano: 10 },
-            { nome: "Bastões elétricos", custo: 3, dano: 26 },
-            { nome: "Picada da Viúva", custo: 5, dano: 48 }
+            { nome: "Ataque Furtivo", custo: 1, dano: 10, efeito: null },
+            { nome: "Bastões Elétricos", custo: 3, dano: 15, efeito: "lentidao" },
+            { nome: "Picada da Viúva", custo: 5, dano: 48, efeito: null }
         ]
     }
 ];
 
 let meuTime = [];
 let heroiAtualIndex = 0;
-let inimigo = { nome: "Ultron", maxHp: 150, currentHp: 150 };
+let inimigo = { nome: "Ultron", maxHp: 150, currentHp: 150, defesaAtiva: false, lento: false };
 
 let currentEnergy = 0;
 const maxEnergy = 10;
-const chargeSpeed = 1.2;
+let chargeSpeed = 1.2;
 
 function renderizarSelecao() {
     const container = document.getElementById("starter-heroes-container");
@@ -94,7 +94,7 @@ function alternarSelecao(heroi) {
     if (index > -1) {
         meuTime.splice(index, 1);
     } else if (meuTime.length < 3) {
-        meuTime.push({ ...heroi, currentHp: heroi.hp });
+        meuTime.push({ ...heroi, currentHp: heroi.hp, defesaAtiva: false });
     }
     renderizarSelecao();
 }
@@ -112,6 +112,7 @@ function atualizarHeroiEmCampo() {
     const heroi = meuTime[heroiAtualIndex];
     document.getElementById("player-name").innerText = heroi.nome;
     atualizarVidaPlayer();
+    atualizarBadges();
     setupMoves();
     renderizarPainelTroca();
 }
@@ -151,8 +152,11 @@ function criarBlocosEnergia() {
 }
 
 function update() {
+    // Aplica velocidade reduzida se estiver sob efeito de lentidão
+    let vel = inimigo.lento ? chargeSpeed * 0.5 : chargeSpeed;
+
     if (currentEnergy < maxEnergy) {
-        currentEnergy += chargeSpeed * 0.05;
+        currentEnergy += vel * 0.05;
         if (currentEnergy > maxEnergy) currentEnergy = maxEnergy;
     }
 
@@ -183,7 +187,13 @@ function setupMoves() {
         const btn = document.createElement("button");
         btn.id = `move-btn-${index}`;
         btn.className = "btn-move";
-        btn.innerText = `${move.nome}\n(${move.custo} blocos)`;
+        
+        let detalheEfeito = "";
+        if (move.efeito === "defesa") detalheEfeito = " [+Defesa]";
+        if (move.efeito === "cura") detalheEfeito = " [+Cura]";
+        if (move.efeito === "lentidao") detalheEfeito = " [Lentidão]";
+
+        btn.innerText = `${move.nome}${detalheEfeito}\n(${move.custo} blocos)`;
         btn.onclick = () => atracar(move);
         movesContainer.appendChild(btn);
     });
@@ -192,11 +202,32 @@ function setupMoves() {
 function atracar(move) {
     if (currentEnergy >= move.custo) {
         currentEnergy -= move.custo;
-        inimigo.currentHp -= move.dano;
+        const heroi = meuTime[heroiAtualIndex];
+
+        // Lógica de Dano e Defesa do Inimigo
+        let danoFinal = move.dano;
+        if (inimigo.defesaAtiva && danoFinal > 0) {
+            danoFinal = Math.floor(danoFinal / 2);
+            inimigo.defesaAtiva = false; // Defesa consome após o ataque
+        }
+
+        inimigo.currentHp -= danoFinal;
         if (inimigo.currentHp < 0) inimigo.currentHp = 0;
 
-        document.getElementById("enemy-hp-fill").style.width = (inimigo.currentHp / inimigo.maxHp * 100) + "%";
-        document.getElementById("enemy-hp-text").innerText = `${inimigo.currentHp} / ${inimigo.maxHp} HP`;
+        // Lógica de Efeitos de Status
+        if (move.efeito === "defesa") {
+            heroi.defesaAtiva = true;
+        } else if (move.efeito === "cura") {
+            heroi.currentHp += 30;
+            if (heroi.currentHp > heroi.hp) heroi.currentHp = heroi.hp;
+        } else if (move.efeito === "lentidao") {
+            inimigo.lento = true;
+            setTimeout(() => { inimigo.lento = false; atualizarBadges(); }, 5000); // Dura 5 segundos
+        }
+
+        atualizarVidaPlayer();
+        atualizarVidaInimigo();
+        atualizarBadges();
 
         if (inimigo.currentHp === 0) {
             alert("Você venceu a batalha!");
@@ -204,11 +235,31 @@ function atracar(move) {
     }
 }
 
+function atualizarBadges() {
+    const heroi = meuTime[heroiAtualIndex];
+    const playerBadge = document.getElementById("player-status-text");
+    const enemyBadge = document.getElementById("enemy-status-text");
+
+    playerBadge.innerText = heroi.defesaAtiva ? "🛡️ DEFESA ALTA" : "";
+    
+    let statusInimigo = [];
+    if (inimigo.defesaAtiva) statusInimigo.push("🛡️ DEFESA");
+    if (inimigo.lento) statusInimigo.push("🕸️ LENTO");
+    enemyBadge.innerText = statusInimigo.join(" ");
+}
+
 function atualizarVidaPlayer() {
     const heroi = meuTime[heroiAtualIndex];
     const pct = (heroi.currentHp / heroi.hp * 100);
     document.getElementById("player-hp-fill").style.width = pct + "%";
     document.getElementById("player-hp-text").innerText = `${heroi.currentHp} / ${heroi.hp} HP`;
+    renderizarPainelTroca();
+}
+
+function atualizarVidaInimigo() {
+    const pct = (inimigo.currentHp / inimigo.maxHp * 100);
+    document.getElementById("enemy-hp-fill").style.width = pct + "%";
+    document.getElementById("enemy-hp-text").innerText = `${inimigo.currentHp} / ${inimigo.maxHp} HP`;
 }
 
 renderizarSelecao();

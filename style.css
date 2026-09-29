@@ -332,3 +332,31 @@ body {
 .animar-dano {
   animation: levarDano 0.4s ease-in-out;
 }
+
+/* Fundo Temático estilo Os Mini Titãs 2 com a Torre */
+#selection-screen {
+    position: relative;
+    background: linear-gradient(180deg, #1e90ff 0%, #70a1ff 60%, #eccc68 100%);
+    overflow: hidden;
+}
+
+/* Silhueta Cartunesca da Torre dos Vingadores no Fundo */
+#selection-screen::before {
+    content: "";
+    position: absolute;
+    right: -20px;
+    bottom: 0;
+    width: 220px;
+    height: 380px;
+    background: #2f3542;
+    clip-path: polygon(20% 0%, 80% 10%, 100% 35%, 70% 38%, 95% 45%, 60% 100%, 0% 100%, 10% 35%);
+    border-left: 5px solid #1e272e;
+    opacity: 0.85;
+    z-index: 0;
+}
+
+/* Garante que os menus e os slots dos heróis fiquem na frente da torre */
+.podium-base, .cards-container, h2, .btn-start, .select-label {
+    position: relative;
+    z-index: 2;
+}

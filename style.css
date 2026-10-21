@@ -52,18 +52,20 @@ body {
 
 .target {
     position: absolute;
-    width: 80px;
-    height: 80px;
-    /* Ícone temporário em vetor leve para não quebrar no GitHub */
-    background-image: url('https://iconify.design');
+    width: 75px;
+    height: 75px;
+    /* Imagem alternativa estável hospedada na CDN oficial do Twitter Open Source */
+    background-image: url('https://cloudflare.com');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-    transition: transform 0.1s ease;
-    animation: popUp 0.5s ease-out;
+    filter: drop-shadow(2px 3px 5px rgba(0,0,0,0.6));
+    transition: transform 0.05s ease;
+    animation: popUp 0.4s ease-out;
     z-index: 5;
+    cursor: crosshair;
 }
+
 
 .screen {
     position: absolute;

@@ -4,35 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Defenda a Fazenda do Coragem!</title>
-    <!-- Vincula o arquivo CSS externo -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="game-container">
+        <!-- HUD (Interface Superior) -->
         <div id="hud">
             <div class="hud-item">ONDA: <span id="wave-val">1</span></div>
             <div class="hud-item">ABATES: <span id="kills-val">0</span></div>
             <div class="hud-item">PONTOS: <span id="score-val">000000</span></div>
         </div>
 
+        <!-- Efeito de Flash do Tiro -->
         <div id="shoot-flash" class="flash"></div>
 
+        <!-- Tela Inicial -->
         <div id="start-screen" class="screen">
-            <h1>MATE A AULA NA FAZENDA!</h1>
-            <p>Mire com o mouse e clique para acertar os alvos antes que sumam.</p>
-            <button class="btn-play" onclick="startGame()">PLAY</button>
+            <h1>DEFENDA A FAZENDA!</h1>
+            <p>Mire com o mouse e clique rápido no Coragem antes que ele suma.</p>
+            <button id="play-button" class="btn-play">PLAY</button>
         </div>
 
+        <!-- Tela de Game Over -->
         <div id="gameover-screen" class="screen hide">
             <h1>FIM DE JOGO!</h1>
-            <p>Você limpou a fazenda até onde conseguiu.</p>
+            <p>O Coragem invadiu a fazenda!</p>
             <p>Pontuação Final: <span id="final-score" style="color: #ffcc00;">0</span></p>
-            <button class="btn-play" onclick="startGame()">JOGAR DE NOVO</button>
+            <button id="retry-button" class="btn-play">JOGAR DE NOVO</button>
         </div>
     </div>
 
-    <!-- Vincula o arquivo JavaScript externo -->
     <script src="script.js"></script>
 </body>
 </html>

@@ -21,14 +21,17 @@ body {
     width: 800px;
     height: 600px;
     background-color: #c96b34;
-    /* Imagem otimizada direto do repositório de mídia pública */
-    background-image: url('https://wikimedia.org'); 
+    
+    /* COLOQUE EXATAMENTE ESSA LINHA ABAIXO */
+    background-image: url('Casa_da_Fazenda_dos_Bagge.webp'); 
+    
     background-size: cover;
     background-position: center;
     border: 4px solid #333;
     box-shadow: 0 0 20px rgba(0,0,0,0.8);
     cursor: crosshair;
 }
+
 
 #hud {
     position: absolute;

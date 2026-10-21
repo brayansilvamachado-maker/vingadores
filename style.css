@@ -49,21 +49,24 @@ body {
     color: #ffcc00;
 }
 
-/* Configuração do alvo usando a sua imagem em pixel art */
 .target {
     position: absolute;
     width: 90px;
     height: 90px;
-    background-image: url('coragem.png');
+    
+    /* MODIFIQUE APENAS ESSA LINHA ABAIXO COM O SEU NOME CORRETO */
+    background-image: url('coragem.jpg');
+    
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    /* Mantém os pixels nítidos e sem desfoque */
     image-rendering: pixelated; 
     filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.7));
     animation: popUp 0.3s ease-out;
     z-index: 5;
 }
+
+
 
 .reload-text {
     position: absolute;

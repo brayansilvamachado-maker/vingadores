@@ -17,15 +17,16 @@ let kills = 0;
 let wave = 1;
 let ammo = 6;
 const maxAmmo = 6;
-let hp = 3; // Sistema de 3 pontos de vida
+let playerHp = 10; // 10 blocos de vida total do jogador
 let gameInterval;
 let isPlaying = false;
 let isReloading = false;
-let spawnSpeed = 1500; 
+let spawnSpeed = 1800; // Cadência inicial mais amigável e cadenciada
 
 playButton.addEventListener('click', startGame);
 retryButton.addEventListener('click', startGame);
 
+// Previne menu padrão do clique direito para funcionar a recarga rápida
 gameContainer.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     reloadWeapon();
@@ -36,8 +37,8 @@ function startGame() {
     kills = 0;
     wave = 1;
     ammo = maxAmmo;
-    hp = 3;
-    spawnSpeed = 1500;
+    playerHp = 10;
+    spawnSpeed = 1800;
     isPlaying = true;
     isReloading = false;
 
@@ -58,32 +59,43 @@ function spawnTarget() {
     const target = document.createElement('div');
     target.classList.add('target');
 
-    // Ponto fixo no horizonte (centro aproximado do cenário lá atrás perto da casa)
+    // Vida individual deste Coragem específico (3 acertos para morrer)
+    target.dataset.hp = "3";
+
+    // Cria o indicador de texto de vida sobre a cabeça dele
+    const hpDisplay = document.createElement('div');
+    hpDisplay.classList.add('enemy-hp');
+    hpDisplay.textContent = "HP: |||";
+    target.appendChild(hpDisplay);
+
     const horizonX = 400; 
     const horizonY = 320; 
 
-    // Dispersão aleatória para onde ele vai correr na tela ao chegar perto
-    const targetX = Math.floor(Math.random() * (gameContainer.clientWidth - 150)) + 75;
-    const targetY = Math.floor(Math.random() * 150) + 400; // Vem para a parte inferior da tela
+    const targetX = Math.floor(Math.random() * (gameContainer.clientWidth - 160)) + 80;
+    const targetY = Math.floor(Math.random() * 120) + 420; 
 
     target.style.left = `${horizonX}px`;
     target.style.top = `${horizonY}px`;
 
+    // Lógica ao atirar diretamente em cima do inimigo
     target.addEventListener('mousedown', (e) => {
         if (e.button === 0) {
-            e.stopPropagation();
+            e.stopPropagation(); // Evita ativar o clique duplo do fundo do cenário
+            
+            // Só computa dano se tiver munição carregada e não estiver recarregando
             if (ammo > 0 && !isReloading) {
-                hitTarget(target);
+                // Executa a função global de gasto de bala para manter consistência
+                fireBullet(); 
+                damageEnemy(target, hpDisplay);
             }
         }
     });
 
     gameContainer.appendChild(target);
 
-    // Controle da corrida (aproximação progressiva por frames)
     let progress = 0;
-    // O Coragem corre mais rápido a cada onda que passa
-    let runSpeed = 0.01 + (wave * 0.003); 
+    // Corrida mais lenta e controlada, subindo progressivamente a cada onda
+    let runSpeed = 0.005 + (wave * 0.0015); 
 
     const runInterval = setInterval(() => {
         if (!isPlaying) {
@@ -94,14 +106,12 @@ function spawnTarget() {
         progress += runSpeed;
 
         if (progress >= 1) {
-            // Se o progresso chegar a 1, ele atingiu a tela do jogador!
             clearInterval(runInterval);
             if (target.parentNode) {
                 target.remove();
-                takeDamage();
+                takeDamage(2); // Inimigo que chega rouba 2 blocos de vida direto
             }
         } else {
-            // Interpolação linear de movimento e tamanho de escala (efeito zoom)
             const currentX = horizonX + (targetX - horizonX) * progress;
             const currentY = horizonY + (targetY - horizonY) * progress;
             
@@ -109,17 +119,24 @@ function spawnTarget() {
             target.style.top = `${currentY}px`;
             target.style.transform = `translate(-50%, -50%) scale(${progress})`;
         }
-    }, 20); // Atualiza a cada 20 milissegundos
+    }, 20); 
 }
 
-// Lógica de disparo
+// Lógica ao clicar em qualquer lugar vazio do cenário (Tiro Errado)
 gameContainer.addEventListener('mousedown', (e) => {
     if (!isPlaying || isReloading || e.button !== 0) return;
+    
+    // Dispara a bala normalmente (mecanismo que gasta munição mesmo no erro)
+    fireBullet();
+});
 
+// Mecanismo central unificado de disparo da arma
+function fireBullet() {
     if (ammo > 0) {
         ammo--;
         updateHUD();
         
+        // Efeito de Clarão na Tela
         shootFlash.style.opacity = '1';
         setTimeout(() => shootFlash.style.opacity = '0', 40);
 
@@ -129,7 +146,35 @@ gameContainer.addEventListener('mousedown', (e) => {
     } else {
         reloadPrompt.classList.remove('hide');
     }
-});
+}
+
+// Lógica de dano ao inimigo
+function damageEnemy(enemyElement, display) {
+    let currentEnemyHp = parseInt(enemyElement.dataset.hp);
+    currentEnemyHp--;
+    enemyElement.dataset.hp = currentEnemyHp;
+
+    if (currentEnemyHp <= 0) {
+        enemyElement.remove();
+        kills++;
+        score += 150 * wave;
+        
+        if (kills % 5 === 0) {
+            wave++;
+            adjustDifficulty();
+        }
+        updateHUD();
+    } else {
+        // Atualiza os palitinhos visuais do HP dele
+        display.textContent = "HP: " + "|".repeat(currentEnemyHp);
+        
+        // Pequeno efeito físico de recuo rápido ao tomar o tiro
+        enemyElement.style.filter = "brightness(2) drop-shadow(2px 3px 4px rgba(0,0,0,0.7))";
+        setTimeout(() => {
+            if(enemyElement) enemyElement.style.filter = "brightness(1) drop-shadow(2px 3px 4px rgba(0,0,0,0.7))";
+        }, 60);
+    }
+}
 
 function reloadWeapon() {
     if (!isPlaying || isReloading || ammo === maxAmmo) return;
@@ -147,36 +192,22 @@ function reloadWeapon() {
     }, 800);
 }
 
-function hitTarget(targetElement) {
-    targetElement.remove();
-    kills++;
-    score += 100 * wave;
-    
-    if (kills % 6 === 0) {
-        wave++;
-        adjustDifficulty();
-    }
-
-    updateHUD();
-}
-
-function takeDamage() {
-    hp--;
+function takeDamage(amount) {
+    playerHp -= amount;
     updateHUD();
 
-    // Efeito de tela vermelha de dano
     const hurt = document.createElement('div');
     hurt.classList.add('hurt-flash');
     gameContainer.appendChild(hurt);
-    setTimeout(() => hurt.remove(), 300);
+    setTimeout(() => hurt.remove(), 250);
 
-    if (hp <= 0) {
+    if (playerHp <= 0) {
         endGame();
     }
 }
 
 function adjustDifficulty() {
-    spawnSpeed = Math.max(500, 1500 - (wave * 100));
+    spawnSpeed = Math.max(600, 1800 - (wave * 120));
     clearInterval(gameInterval);
     gameInterval = setInterval(spawnTarget, spawnSpeed);
 }
@@ -187,8 +218,17 @@ function updateHUD() {
     waveVal.textContent = wave;
     ammoVal.textContent = `${ammo}/${maxAmmo}`;
     
-    // Atualiza os corações visuais
-    hpVal.textContent = "❤️".repeat(Math.max(0, hp));
+    // Atualiza a barra de blocos do jogador e muda de cor se a vida estiver crítica
+    const remainingBars = Math.max(0, playerHp);
+    hpVal.textContent = `[${"|".repeat(remainingBars)}${".".repeat(10 - remainingBars)}]`;
+    
+    if (playerHp <= 3) {
+        hpVal.style.color = "#ff3333"; // Vermelho crítico
+    } else if (playerHp <= 6) {
+        hpVal.style.color = "#ffcc00"; // Amarelo alerta
+    } else {
+        hpVal.style.color = "#33ff33"; // Verde estável
+    }
 }
 
 function endGame() {

@@ -15,6 +15,8 @@
             <div class="hud-item">ABATES: <span id="kills-val">0</span></div>
             <div class="hud-item">MUNIÇÃO: <span id="ammo-val">6/6</span></div>
             <div class="hud-item">PONTOS: <span id="score-val">000000</span></div>
+            <!-- Nova Barra de Vida -->
+            <div class="hud-item">VIDA: <span id="hp-val" style="color: #ff3333;">❤️❤️❤️</span></div>
         </div>
 
         <!-- Efeito de Flash do Tiro -->
@@ -26,14 +28,15 @@
         <!-- Tela Inicial -->
         <div id="start-screen" class="screen">
             <h1>DEFENDA A FAZENDA!</h1>
-            <p>Clique esquerdo para atirar no Coragem. Botão direito para recarregar a arma!</p>
+            <p>Os Coragens vão correr lá de trás em sua direção! Atire antes que eles te ataquem.</p>
+            <p>Clique esquerdo: Atira | Botão direito: Recarrega</p>
             <button id="play-button" class="btn-play">PLAY</button>
         </div>
 
         <!-- Tela de Game Over -->
         <div id="gameover-screen" class="screen hide">
             <h1>FIM DE JOGO!</h1>
-            <p>Muitos Coragens acumularam na fazenda!</p>
+            <p>Você foi derrubado pelos cachorros!</p>
             <p>Pontuação Final: <span id="final-score" style="color: #ffcc00;">0</span></p>
             <button id="retry-button" class="btn-play">JOGAR DE NOVO</button>
         </div>

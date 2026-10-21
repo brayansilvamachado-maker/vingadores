@@ -3,6 +3,7 @@ const scoreVal = document.getElementById('score-val');
 const killsVal = document.getElementById('kills-val');
 const waveVal = document.getElementById('wave-val');
 const ammoVal = document.getElementById('ammo-val');
+const hpVal = document.getElementById('hp-val');
 const startScreen = document.getElementById('start-screen');
 const gameoverScreen = document.getElementById('gameover-screen');
 const finalScore = document.getElementById('final-score');
@@ -16,15 +17,15 @@ let kills = 0;
 let wave = 1;
 let ammo = 6;
 const maxAmmo = 6;
+let hp = 3; // Sistema de 3 pontos de vida
 let gameInterval;
 let isPlaying = false;
 let isReloading = false;
-let spawnSpeed = 1200;
+let spawnSpeed = 1500; 
 
 playButton.addEventListener('click', startGame);
 retryButton.addEventListener('click', startGame);
 
-// Bloqueia o menu padrão do botão direito dentro do jogo para usá-lo para recarregar
 gameContainer.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     reloadWeapon();
@@ -35,7 +36,8 @@ function startGame() {
     kills = 0;
     wave = 1;
     ammo = maxAmmo;
-    spawnSpeed = 1200;
+    hp = 3;
+    spawnSpeed = 1500;
     isPlaying = true;
     isReloading = false;
 
@@ -53,23 +55,21 @@ function startGame() {
 function spawnTarget() {
     if (!isPlaying) return;
 
-    // Se juntarem 5 ou mais Coragens na tela ao mesmo tempo, dá Game Over
-    if (document.querySelectorAll('.target').length >= 5) {
-        endGame();
-        return;
-    }
-
     const target = document.createElement('div');
     target.classList.add('target');
 
-    const x = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 5;
-    const y = Math.floor(Math.random() * (gameContainer.clientHeight - 180)) + 90;
+    // Ponto fixo no horizonte (centro aproximado do cenário lá atrás perto da casa)
+    const horizonX = 400; 
+    const horizonY = 320; 
 
-    target.style.left = `${x}px`;
-    target.style.top = `${y}px`;
+    // Dispersão aleatória para onde ele vai correr na tela ao chegar perto
+    const targetX = Math.floor(Math.random() * (gameContainer.clientWidth - 150)) + 75;
+    const targetY = Math.floor(Math.random() * 150) + 400; // Vem para a parte inferior da tela
+
+    target.style.left = `${horizonX}px`;
+    target.style.top = `${horizonY}px`;
 
     target.addEventListener('mousedown', (e) => {
-        // Só acerta o alvo se for com o clique esquerdo (botão 0)
         if (e.button === 0) {
             e.stopPropagation();
             if (ammo > 0 && !isReloading) {
@@ -80,15 +80,39 @@ function spawnTarget() {
 
     gameContainer.appendChild(target);
 
-    // O tempo que ele fica na tela diminui conforme as ondas passam
-    setTimeout(() => {
-        if (target.parentNode && isPlaying) {
-            target.remove();
+    // Controle da corrida (aproximação progressiva por frames)
+    let progress = 0;
+    // O Coragem corre mais rápido a cada onda que passa
+    let runSpeed = 0.01 + (wave * 0.003); 
+
+    const runInterval = setInterval(() => {
+        if (!isPlaying) {
+            clearInterval(runInterval);
+            return;
         }
-    }, spawnSpeed * 1.5);
+
+        progress += runSpeed;
+
+        if (progress >= 1) {
+            // Se o progresso chegar a 1, ele atingiu a tela do jogador!
+            clearInterval(runInterval);
+            if (target.parentNode) {
+                target.remove();
+                takeDamage();
+            }
+        } else {
+            // Interpolação linear de movimento e tamanho de escala (efeito zoom)
+            const currentX = horizonX + (targetX - horizonX) * progress;
+            const currentY = horizonY + (targetY - horizonY) * progress;
+            
+            target.style.left = `${currentX}px`;
+            target.style.top = `${currentY}px`;
+            target.style.transform = `translate(-50%, -50%) scale(${progress})`;
+        }
+    }, 20); // Atualiza a cada 20 milissegundos
 }
 
-// Lógica de disparo no cenário
+// Lógica de disparo
 gameContainer.addEventListener('mousedown', (e) => {
     if (!isPlaying || isReloading || e.button !== 0) return;
 
@@ -96,7 +120,6 @@ gameContainer.addEventListener('mousedown', (e) => {
         ammo--;
         updateHUD();
         
-        // Efeito visual de flash do tiro
         shootFlash.style.opacity = '1';
         setTimeout(() => shootFlash.style.opacity = '0', 40);
 
@@ -104,7 +127,6 @@ gameContainer.addEventListener('mousedown', (e) => {
             reloadPrompt.classList.remove('hide');
         }
     } else {
-        // Alerta visual de falta de munição
         reloadPrompt.classList.remove('hide');
     }
 });
@@ -116,14 +138,13 @@ function reloadWeapon() {
     reloadPrompt.textContent = "RECARREGANDO...";
     reloadPrompt.classList.remove('hide');
 
-    // Tempo de recarga de 1 segundo
     setTimeout(() => {
         ammo = maxAmmo;
         isReloading = false;
         reloadPrompt.classList.add('hide');
         reloadPrompt.textContent = "CLIQUE COM O BOTÃO DIREITO PARA RECARREGAR!";
         updateHUD();
-    }, 1000);
+    }, 800);
 }
 
 function hitTarget(targetElement) {
@@ -131,8 +152,7 @@ function hitTarget(targetElement) {
     kills++;
     score += 100 * wave;
     
-    // Aumenta a velocidade e traz mais inimigos a cada 7 abates
-    if (kills % 7 === 0) {
+    if (kills % 6 === 0) {
         wave++;
         adjustDifficulty();
     }
@@ -140,8 +160,23 @@ function hitTarget(targetElement) {
     updateHUD();
 }
 
+function takeDamage() {
+    hp--;
+    updateHUD();
+
+    // Efeito de tela vermelha de dano
+    const hurt = document.createElement('div');
+    hurt.classList.add('hurt-flash');
+    gameContainer.appendChild(hurt);
+    setTimeout(() => hurt.remove(), 300);
+
+    if (hp <= 0) {
+        endGame();
+    }
+}
+
 function adjustDifficulty() {
-    spawnSpeed = Math.max(400, 1200 - (wave * 90));
+    spawnSpeed = Math.max(500, 1500 - (wave * 100));
     clearInterval(gameInterval);
     gameInterval = setInterval(spawnTarget, spawnSpeed);
 }
@@ -151,6 +186,9 @@ function updateHUD() {
     killsVal.textContent = kills;
     waveVal.textContent = wave;
     ammoVal.textContent = `${ammo}/${maxAmmo}`;
+    
+    // Atualiza os corações visuais
+    hpVal.textContent = "❤️".repeat(Math.max(0, hp));
 }
 
 function endGame() {

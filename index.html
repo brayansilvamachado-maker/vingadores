@@ -13,23 +13,27 @@
         <div id="hud">
             <div class="hud-item">ONDA: <span id="wave-val">1</span></div>
             <div class="hud-item">ABATES: <span id="kills-val">0</span></div>
+            <div class="hud-item">MUNIÇÃO: <span id="ammo-val">6/6</span></div>
             <div class="hud-item">PONTOS: <span id="score-val">000000</span></div>
         </div>
 
         <!-- Efeito de Flash do Tiro -->
         <div id="shoot-flash" class="flash"></div>
+        
+        <!-- Aviso de Recarregar -->
+        <div id="reload-prompt" class="reload-text hide">CLIQUE COM O BOTÃO DIREITO PARA RECARREGAR!</div>
 
         <!-- Tela Inicial -->
         <div id="start-screen" class="screen">
             <h1>DEFENDA A FAZENDA!</h1>
-            <p>Mire com o mouse e clique rápido no Coragem antes que ele suma.</p>
+            <p>Clique esquerdo para atirar no Coragem. Botão direito para recarregar a arma!</p>
             <button id="play-button" class="btn-play">PLAY</button>
         </div>
 
         <!-- Tela de Game Over -->
         <div id="gameover-screen" class="screen hide">
             <h1>FIM DE JOGO!</h1>
-            <p>O Coragem invadiu a fazenda!</p>
+            <p>Muitos Coragens acumularam na fazenda!</p>
             <p>Pontuação Final: <span id="final-score" style="color: #ffcc00;">0</span></p>
             <button id="retry-button" class="btn-play">JOGAR DE NOVO</button>
         </div>

@@ -2,41 +2,50 @@ const gameContainer = document.getElementById('game-container');
 const scoreVal = document.getElementById('score-val');
 const killsVal = document.getElementById('kills-val');
 const waveVal = document.getElementById('wave-val');
+const ammoVal = document.getElementById('ammo-val');
 const startScreen = document.getElementById('start-screen');
 const gameoverScreen = document.getElementById('gameover-screen');
 const finalScore = document.getElementById('final-score');
 const shootFlash = document.getElementById('shoot-flash');
+const reloadPrompt = document.getElementById('reload-prompt');
 const playButton = document.getElementById('play-button');
 const retryButton = document.getElementById('retry-button');
 
 let score = 0;
 let kills = 0;
 let wave = 1;
+let ammo = 6;
+const maxAmmo = 6;
 let gameInterval;
 let isPlaying = false;
+let isReloading = false;
 let spawnSpeed = 1200;
 
-// Vincula os eventos de clique diretamente aos botões para evitar falhas inline
 playButton.addEventListener('click', startGame);
 retryButton.addEventListener('click', startGame);
+
+// Bloqueia o menu padrão do botão direito dentro do jogo para usá-lo para recarregar
+gameContainer.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    reloadWeapon();
+});
 
 function startGame() {
     score = 0;
     kills = 0;
     wave = 1;
+    ammo = maxAmmo;
     spawnSpeed = 1200;
     isPlaying = true;
+    isReloading = false;
 
     updateHUD();
-
-    // Esconde as telas de menu de forma segura usando classes CSS
     startScreen.classList.add('hide');
     gameoverScreen.classList.add('hide');
+    reloadPrompt.classList.add('hide');
 
-    // Limpa qualquer inimigo remanescente na tela
     document.querySelectorAll('.target').forEach(t => t.remove());
 
-    // Inicia o loop de surgimento dos inimigos
     clearInterval(gameInterval);
     gameInterval = setInterval(spawnTarget, spawnSpeed);
 }
@@ -44,8 +53,8 @@ function startGame() {
 function spawnTarget() {
     if (!isPlaying) return;
 
-    // Se acumularem mais de 4 inimigos na tela ao mesmo tempo, o jogador perde
-    if (document.querySelectorAll('.target').length >= 4) {
+    // Se juntarem 5 ou mais Coragens na tela ao mesmo tempo, dá Game Over
+    if (document.querySelectorAll('.target').length >= 5) {
         endGame();
         return;
     }
@@ -53,43 +62,77 @@ function spawnTarget() {
     const target = document.createElement('div');
     target.classList.add('target');
 
-    // Calcula posições aleatórias dentro do limite visível do jogo
-    const x = Math.floor(Math.random() * (gameContainer.clientWidth - 90)) + 10;
-    const y = Math.floor(Math.random() * (gameContainer.clientHeight - 160)) + 90;
+    const x = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 5;
+    const y = Math.floor(Math.random() * (gameContainer.clientHeight - 180)) + 90;
 
     target.style.left = `${x}px`;
     target.style.top = `${y}px`;
 
-    // Registra o acerto ao clicar no inimigo
     target.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        hitTarget(target);
+        // Só acerta o alvo se for com o clique esquerdo (botão 0)
+        if (e.button === 0) {
+            e.stopPropagation();
+            if (ammo > 0 && !isReloading) {
+                hitTarget(target);
+            }
+        }
     });
 
     gameContainer.appendChild(target);
 
-    // Remove o inimigo se o jogador demorar muito para clicar nele
+    // O tempo que ele fica na tela diminui conforme as ondas passam
     setTimeout(() => {
         if (target.parentNode && isPlaying) {
             target.remove();
         }
-    }, spawnSpeed * 1.6);
+    }, spawnSpeed * 1.5);
 }
 
-// Efeito visual de disparo na tela ao clicar
-gameContainer.addEventListener('mousedown', () => {
-    if (!isPlaying) return;
-    shootFlash.style.opacity = '1';
-    setTimeout(() => shootFlash.style.opacity = '0', 40);
+// Lógica de disparo no cenário
+gameContainer.addEventListener('mousedown', (e) => {
+    if (!isPlaying || isReloading || e.button !== 0) return;
+
+    if (ammo > 0) {
+        ammo--;
+        updateHUD();
+        
+        // Efeito visual de flash do tiro
+        shootFlash.style.opacity = '1';
+        setTimeout(() => shootFlash.style.opacity = '0', 40);
+
+        if (ammo === 0) {
+            reloadPrompt.classList.remove('hide');
+        }
+    } else {
+        // Alerta visual de falta de munição
+        reloadPrompt.classList.remove('hide');
+    }
 });
+
+function reloadWeapon() {
+    if (!isPlaying || isReloading || ammo === maxAmmo) return;
+
+    isReloading = true;
+    reloadPrompt.textContent = "RECARREGANDO...";
+    reloadPrompt.classList.remove('hide');
+
+    // Tempo de recarga de 1 segundo
+    setTimeout(() => {
+        ammo = maxAmmo;
+        isReloading = false;
+        reloadPrompt.classList.add('hide');
+        reloadPrompt.textContent = "CLIQUE COM O BOTÃO DIREITO PARA RECARREGAR!";
+        updateHUD();
+    }, 1000);
+}
 
 function hitTarget(targetElement) {
     targetElement.remove();
     kills++;
     score += 100 * wave;
     
-    // Aumenta a velocidade a cada 8 abates
-    if (kills % 8 === 0) {
+    // Aumenta a velocidade e traz mais inimigos a cada 7 abates
+    if (kills % 7 === 0) {
         wave++;
         adjustDifficulty();
     }
@@ -98,7 +141,7 @@ function hitTarget(targetElement) {
 }
 
 function adjustDifficulty() {
-    spawnSpeed = Math.max(450, 1200 - (wave * 90));
+    spawnSpeed = Math.max(400, 1200 - (wave * 90));
     clearInterval(gameInterval);
     gameInterval = setInterval(spawnTarget, spawnSpeed);
 }
@@ -107,6 +150,7 @@ function updateHUD() {
     scoreVal.textContent = String(score).padStart(6, '0');
     killsVal.textContent = kills;
     waveVal.textContent = wave;
+    ammoVal.textContent = `${ammo}/${maxAmmo}`;
 }
 
 function endGame() {
@@ -114,4 +158,5 @@ function endGame() {
     clearInterval(gameInterval);
     finalScore.textContent = score;
     gameoverScreen.classList.remove('hide');
+    reloadPrompt.classList.add('hide');
 }

@@ -283,4 +283,12 @@ body {
     pointer-events: none; z-index: 15; opacity: 0;
 }
 .hide { display: none !important; }
-@keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+@keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } 
+}
+
+/* Ajuste a largura e altura para o tamanho que você deseja */
+.foto-personagem {
+  width: 150px;  /* Mude para o tamanho que quiser */
+  height: 150px; /* Mude para o tamanho que quiser */
+  object-fit: cover;
+}

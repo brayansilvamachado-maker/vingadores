@@ -269,3 +269,23 @@ function endGame() {
     gameoverScreen.classList.remove('hide');
     reloadPrompt.classList.add('hide');
 }
+
+// 1. Carrega as fotos
+const imgCoragem = new Image();
+imgCoragem.src = 'coragem.png'; // coloque o nome correto da sua foto
+
+const imgEustacio = new Image();
+imgEustacio.src = 'eustacio.png'; // coloque o nome correto da sua foto do Eustácio
+
+// 2. Define a largura e altura grandes para as fotos
+const LARGURA_FOTO = 150; // mude aqui para aumentar ou diminuir
+const ALTURA_FOTO = 150;  // mude aqui para aumentar ou diminuir
+
+// 3. Desenha na tela no tamanho ajustado
+function desenharPersonagens() {
+  // desenha o Coragem no novo tamanho
+  ctx.drawImage(imgCoragem, coragem.x, coragem.y, LARGURA_FOTO, ALTURA_FOTO);
+
+  // desenha o Eustácio no novo tamanho (substitui o quadrado)
+  ctx.drawImage(imgEustacio, eustacio.x, eustacio.y, LARGURA_FOTO, ALTURA_FOTO);
+}

@@ -1,84 +1,158 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defenda a Fazenda!</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Jogo do Coragem</title>
+  <style>
+    /* Estilos do Container do Jogo */
+    #jogo-container {
+      position: relative;
+      width: 800px;
+      height: 600px;
+      background-color: #111;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    /* Personagens e Elementos no Canvas/Tela */
+    .foto-personagem {
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="main-wrapper">
-        <div id="game-container">
-            <!-- Título Superior -->
-            <div id="game-header">
-                <div class="sub-title">FEIRA DE PROFISSÕES • DESENVOLVIMENTO DE SISTEMAS</div>
-                <div class="main-title">DEFENDA A FAZENDA!</div>
-            </div>
+  <div id="jogo-container">
+    <canvas id="meuCanvas" width="800" height="600"></canvas>
+  </div>
 
-            <!-- HUD Interno Superior -->
-            <div id="hud">
-                <div class="hud-group">
-                    <div class="hud-box">PONTOS<br><span id="score-val">000000</span></div>
-                    <div class="hud-box">ABATES<br><span id="kills-val">0</span></div>
-                    <div class="hud-box">ONDA<br><span id="wave-val">1</span></div>
-                </div>
-                <div class="hud-group">
-                    <div class="hud-box highlight">
-                        VIDA
-                        <div class="player-hp-bar">
-                            <div id="player-hp-fill" class="player-hp-fill"></div>
-                        </div>
-                        <span id="hp-val">100</span>
-                    </div>
-                    <div class="hud-box highlight">MUNIÇÃO<br><span id="ammo-val">6 / ∞</span></div>
-                </div>
-            </div>
+  <script>
+    const canvas = document.getElementById('meuCanvas');
+    const ctx = canvas.getContext('2d');
 
-            <!-- Flash do Tiro -->
-            <div id="shoot-flash" class="flash"></div>
-            
-            <!-- Banners Centrais -->
-            <div id="wave-banner" class="wave-announcement hide">ONDA 1<br><span>Defenda a fazenda!</span></div>
-            
-            <!-- Cartão Estilo Boss (Grêmio / Eustáquio) -->
-            <div id="boss-card" class="boss-announcement hide">
-                <h2 id="boss-title">CACHORRO IDIOTA!</h2>
-                <p id="boss-subtitle">você irritou o Eustáquio</p>
-            </div>
+    // --- CARREGAMENTO DAS FOTOS ---
+    const imgCoragem = new Image();
+    imgCoragem.src = 'coragem.png'; // Foto do Coragem (Tamanho Grande)
 
-            <div id="reload-prompt" class="reload-text hide">RECARREGANDO...</div>
+    const imgEustacio = new Image();
+    imgEustacio.src = 'eustacio.png'; // Foto do Eustácio (Boss)
 
-            <!-- Arma do Jogador -->
-            <div id="player-weapon">
-                <div class="hand"></div>
-                <div class="gun-handle"></div>
-                <div class="gun-body"></div>
-            </div>
+    // --- VARIÁVEIS DE ESTADO DO JOGO ---
+    let vidaJogador = 100;
+    let vidaJogadorMaxima = 100;
+    let municao = 10;
+    let municaoMaxima = 10;
 
-            <!-- Tela Inicial -->
-            <div id="start-screen" class="screen">
-                <h1>DEFENDA A FAZENDA!</h1>
-                <p>Atire com o Clique Esquerdo. A munição recarrega automaticamente ao zerar!</p>
-                <button id="play-button" class="btn-play">JOGAR</button>
-            </div>
+    // Tamanhos padronizados (Coragem grande)
+    const TAMANHO_CORAGEM = { largura: 130, altura: 130 };
+    const TAMANHO_EUSTACIO = { largura: 160, altura: 160 }; // Maior por ser Boss
 
-            <!-- Tela de Game Over -->
-            <div id="gameover-screen" class="screen hide">
-                <h1>FIM DE JOGO!</h1>
-                <p>A fazenda foi invadida!</p>
-                <p>Pontuação Final: <span id="final-score" style="color: #ffcc00;">0</span></p>
-                <button id="retry-button" class="btn-play">TENTAR DE NOVO</button>
-            </div>
-        </div>
-    </div>
+    // --- LISTAS DE ELEMENTOS EM MOVIMENTO ---
+    let listaCoragens = []; // Aliados do Coragem que aparecem
+    let bossEustacio = null; // Guardará o Boss Eustácio quando surgir
 
-    <script src="script.js"></script>
+    // --- 1. LÓGICA DE SPAWN DO CORAGEM (AUMENTA QUANDO PERDE VIDA) ---
+    function tentarGerarCoragem() {
+      // Quanto menor a vida, menor o tempo entre spawns (aparece mais Coragem)
+      let taxaVidaPerdida = 1 - (vidaJogador / vidaJogadorMaxima); // 0 a 1
+      let chanceSpawn = 0.3 + (taxaVidaPerdida * 0.5); // Aumenta a chance se estiver com vida baixa
+
+      if (Math.random() < chanceSpawn) {
+        listaCoragens.push({
+          x: Math.random() * (canvas.width - TAMANHO_CORAGEM.largura),
+          y: -130, // Começa no topo vindo em direção à tela
+          largura: TAMANHO_CORAGEM.largura,
+          altura: TAMANHO_CORAGEM.altura,
+          velocidade: 2 // Velocidade normal de avanço
+        });
+      }
+    }
+
+    // Tenta gerar Coragens periodicamente
+    setInterval(tentarGerarCoragem, 2000);
+
+    // --- 2. LÓGICA DO BOSS EUSTÁCIO (DEVAGAR E COM MUITA RESISTÊNCIA) ---
+    function criarBossEustacio() {
+      bossEustacio = {
+        x: Math.random() * (canvas.width - TAMANHO_EUSTACIO.largura),
+        y: -160, // Começa fora da tela e vem vindo
+        largura: TAMANHO_EUSTACIO.largura,
+        altura: TAMANHO_EUSTACIO.altura,
+        velocidade: 0.6, // Vem vindo bem devagar
+        vida: 500,       // Muita resistência (Boss)
+        vidaMaxima: 500
+      };
+    }
+
+    // Exemplo: Gera o Boss Eustácio após 5 segundos de jogo
+    setTimeout(criarBossEustacio, 5000);
+
+    // --- 3. FUNÇÃO DE RECARGA (RECARREGA MUNIÇÃO E RECUPERA VIDA) ---
+    function recarregarETratarVida() {
+      municao = municaoMaxima;
+      
+      // Quando recarrega, recupera uma parte da vida
+      vidaJogador += 30;
+      if (vidaJogador > vidaJogadorMaxima) {
+        vidaJogador = vidaJogadorMaxima; // Não ultrapassa o limite
+      }
+      console.log("Munição recarregada e vida recuperada para: " + vidaJogador);
+    }
+
+    // Exemplo: Tecla 'R' para recarregar munição e vida
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        recarregarETratarVida();
+      }
+    });
+
+    // --- LOOP PRINCIPAL DO JOGO ---
+    function atualizar() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // --- MOVIMENTAR E DESENHAR OUTROS CORAGENS QUE VÊM VINDO ---
+      for (let i = 0; i < listaCoragens.length; i++) {
+        let c = listaCoragens[i];
+        c.y += c.velocidade; // Avança para baixo
+
+        ctx.drawImage(imgCoragem, c.x, c.y, c.largura, c.altura);
+
+        // Se sair da tela, remove
+        if (c.y > canvas.height) {
+          listaCoragens.splice(i, 1);
+          i--;
+        }
+      }
+
+      // --- MOVIMENTAR E DESENHAR O BOSS EUSTÁCIO ---
+      if (bossEustacio) {
+        // Eustácio vem vindo devagar
+        bossEustacio.y += bossEustacio.velocidade;
+
+        // Desenha a foto do Eustácio
+        ctx.drawImage(
+          imgEustacio, 
+          bossEustacio.x, 
+          bossEustacio.y, 
+          bossEustacio.largura, 
+          bossEustacio.altura
+        );
+
+        // Barra de Vida Resistente em cima dele
+        ctx.fillStyle = 'red';
+        ctx.fillRect(bossEustacio.x, bossEustacio.y - 12, bossEustacio.largura, 10);
+        
+        ctx.fillStyle = 'green';
+        let larguraVida = (bossEustacio.largura * (bossEustacio.vida / bossEustacio.vidaMaxima));
+        ctx.fillRect(bossEustacio.x, bossEustacio.y - 12, larguraVida, 10);
+      }
+
+      requestAnimationFrame(atualizar);
+    }
+
+    // Inicia o jogo
+    atualizar();
+  </script>
+
 </body>
 </html>
-
-
-
-  <!-- Imagem do Eustácio (Boss) -->
-  <img id="eustacio" src="eustacio.jpg" alt="Eustácio">
-</div>

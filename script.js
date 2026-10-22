@@ -28,11 +28,11 @@ let gameInterval;
 let isPlaying = false;
 let isReloading = false;
 let spawnSpeed = 2000;
+let eustaquioSpawnedInWave5 = false;
 
 playButton.addEventListener('click', startGame);
 retryButton.addEventListener('click', startGame);
 
-// Desativa o menu do botão direito no jogo
 gameContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
 function startGame() {
@@ -44,6 +44,7 @@ function startGame() {
     spawnSpeed = 2000;
     isPlaying = true;
     isReloading = false;
+    eustaquioSpawnedInWave5 = false;
 
     updateHUD();
     startScreen.classList.add('hide');
@@ -59,16 +60,9 @@ function startGame() {
 }
 
 function triggerWaveBanner() {
-    waveBanner.innerHTML = `ONDA ${wave}<br><span>${wave === 2 ? 'Eles estão mais rápidos!' : 'Defenda a fazenda!'}</span>`;
+    waveBanner.innerHTML = `ONDA ${wave}<br><span>${wave === 5 ? 'PREPARE-SE PARA O BOSS!' : 'Defenda a fazenda!'}</span>`;
     waveBanner.classList.remove('hide');
     setTimeout(() => waveBanner.classList.add('hide'), 2000);
-}
-
-function showBossAnnouncement(title, subtitle) {
-    bossTitle.textContent = title;
-    bossSubtitle.textContent = subtitle;
-    bossCard.classList.remove('hide');
-    setTimeout(() => bossCard.classList.add('hide'), 2500);
 }
 
 function spawnTarget() {
@@ -77,28 +71,43 @@ function spawnTarget() {
     const target = document.createElement('div');
     target.classList.add('target');
 
-    // 30% de hipóteses de surgir o Eustáquio
-    const isEustaquioBoss = Math.random() > 0.70; 
+    let isEustaquioBoss = false;
+    let isRareTarget = false;
+
+    // Regra do Boss Eustáquio na Onda 5
+    if (wave >= 5 && !eustaquioSpawnedInWave5) {
+        isEustaquioBoss = true;
+        eustaquioSpawnedInWave5 = true;
+    } else if (wave >= 3 && Math.random() > 0.65) {
+        // A partir da Onda 3 aparecem alvos com 2 tiros
+        isRareTarget = true;
+    }
 
     if (isEustaquioBoss) {
         target.classList.add('eustaquio');
-        target.dataset.hp = "3"; // Requer 3 tiros
-        target.dataset.maxHp = "3";
-        target.style.backgroundImage = "url('eustaquio.png')"; 
+        target.dataset.hp = "5"; 
+        target.dataset.maxHp = "5";
+        target.style.backgroundImage = "url('eustaquio.png')";
 
-        // Balão de fala
-        const bubble = document.createElement('div');
-        bubble.classList.add('speech-bubble');
-        bubble.textContent = "Cachorro idiota!";
-        target.appendChild(bubble);
+        // Mostra a frase do boss no meio da tela antes de ele avançar
+        bossTitle.textContent = "CACHORRO IDIOTA!";
+        bossSubtitle.textContent = "você irritou o Eustáquio";
+        bossCard.classList.remove('hide');
 
-        showBossAnnouncement("CACHORRO IDIOTA!", "O Eustáquio apareceu!");
+        setTimeout(() => {
+            bossCard.classList.add('hide');
+        }, 2200);
+
+    } else if (isRareTarget) {
+        target.dataset.hp = "2";
+        target.dataset.maxHp = "2";
+        target.style.backgroundImage = "url('coragem.jpg')";
     } else {
-        target.dataset.hp = "1"; // Inimigo comum (1 tiro)
+        target.dataset.hp = "1";
         target.style.backgroundImage = "url('coragem.jpg')";
     }
 
-    // Barra de vida para inimigos com mais de 1 de HP
+    // Barra de vida para quem tem mais de 1 tiro
     if (parseInt(target.dataset.hp) > 1) {
         const hpBar = document.createElement('div');
         hpBar.classList.add('enemy-hp');
@@ -131,31 +140,35 @@ function spawnTarget() {
     let progress = 0;
     let runSpeed = 0.004 + (wave * 0.0012); 
 
-    const runInterval = setInterval(() => {
-        if (!isPlaying) {
-            clearInterval(runInterval);
-            return;
-        }
+    // Se for o Boss, ele espera 1 segundo antes de começar a correr para dar tempo da fala sumir
+    const delayBeforeRun = isEustaquioBoss ? 1000 : 0;
 
-        progress += runSpeed;
-
-        if (progress >= 1) {
-            clearInterval(runInterval);
-            if (target.parentNode) {
-                target.remove();
-                takeDamage(20);
+    setTimeout(() => {
+        const runInterval = setInterval(() => {
+            if (!isPlaying) {
+                clearInterval(runInterval);
+                return;
             }
-        } else {
-            const currentX = horizonX + (targetX - horizonX) * progress;
-            const currentY = horizonY + (targetY - horizonY) * progress;
-            target.style.left = `${currentX}px`;
-            target.style.top = `${currentY}px`;
-            target.style.transform = `translate(-50%, -50%) scale(${progress})`;
-        }
-    }, 20); 
+
+            progress += runSpeed;
+
+            if (progress >= 1) {
+                clearInterval(runInterval);
+                if (target.parentNode) {
+                    target.remove();
+                    takeDamage(20);
+                }
+            } else {
+                const currentX = horizonX + (targetX - horizonX) * progress;
+                const currentY = horizonY + (targetY - horizonY) * progress;
+                target.style.left = `${currentX}px`;
+                target.style.top = `${currentY}px`;
+                target.style.transform = `translate(-50%, -50%) scale(${progress})`;
+            }
+        }, 20);
+    }, delayBeforeRun);
 }
 
-// Tiro ao clicar no cenário
 gameContainer.addEventListener('mousedown', (e) => {
     if (!isPlaying || isReloading || e.button !== 0) return;
     fireBullet();
@@ -166,14 +179,12 @@ function fireBullet() {
         ammo--;
         updateHUD();
         
-        // Animação da arma
         playerWeapon.classList.add('weapon-shoot');
         setTimeout(() => playerWeapon.classList.remove('weapon-shoot'), 60);
 
         shootFlash.style.opacity = '1';
         setTimeout(() => shootFlash.style.opacity = '0', 40);
 
-        // Recarga automática ao zerar
         if (ammo === 0) {
             autoReload();
         }
@@ -205,6 +216,7 @@ function damageEnemy(enemyElement) {
         
         if (kills % 6 === 0) {
             wave++;
+            eustaquioSpawnedInWave5 = false;
             triggerWaveBanner();
             adjustDifficulty();
         }
@@ -240,7 +252,6 @@ function updateHUD() {
     ammoVal.textContent = `${ammo} / ∞`;
     hpVal.textContent = playerHp;
 
-    // Atualiza a barra de vida verde/amarela/vermelha
     hpFill.style.width = `${playerHp}%`;
     if (playerHp > 50) {
         hpFill.style.backgroundColor = "#22c55e";

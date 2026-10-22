@@ -4,19 +4,31 @@
   <meta charset="UTF-8">
   <title>Jogo do Coragem</title>
   <style>
-    /* Estilos do Container do Jogo */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Container do Jogo */
     #jogo-container {
       position: relative;
       width: 800px;
       height: 600px;
-      background-color: #111;
+      background-color: #1a1a1a;
+      border: 3px solid #ffcc00;
+      box-shadow: 0px 0px 20px rgba(255, 204, 0, 0.4);
       overflow: hidden;
-      margin: 0 auto;
     }
 
-    /* Personagens e Elementos no Canvas/Tela */
-    .foto-personagem {
-      object-fit: cover;
+    canvas {
+      display: block;
+      background-color: #222;
     }
   </style>
 </head>
@@ -30,12 +42,39 @@
     const canvas = document.getElementById('meuCanvas');
     const ctx = canvas.getContext('2d');
 
-    // --- CARREGAMENTO DAS FOTOS ---
-    const imgCoragem = new Image();
-    imgCoragem.src = 'coragem.jpg'; // Foto do Coragem (Tamanho Grande)
+    // --- GERADOR DE COR RESERVA (Para garantir que NUNCA fique branco se a imagem falhar) ---
+    function criarFallbackImage(texto, corFundo, corTexto) {
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 160;
+      tempCanvas.height = 160;
+      const tCtx = tempCanvas.getContext('2d');
+      tCtx.fillStyle = corFundo;
+      tCtx.fillRect(0, 0, 160, 160);
+      tCtx.fillStyle = corTexto;
+      tCtx.font = 'bold 20px Arial';
+      tCtx.textAlign = 'center';
+      tCtx.textBaseline = 'middle';
+      tCtx.fillText(texto, 80, 80);
+      const img = new Image();
+      img.src = tempCanvas.toDataURL();
+      return img;
+    }
 
-    const imgEustacio = new Image();
-    imgEustacio.src = 'eustacio.jpg'; // Foto do Eustácio (Boss)
+    const fallbackCoragem = criarFallbackImage('CORAGEM', '#e91e63', '#ffffff');
+    const fallbackEustacio = criarFallbackImage('EUSTÁCIO', '#795548', '#ffffff');
+
+    // --- CARREGAMENTO DAS FOTOS ---
+    let imgCoragem = new Image();
+    let carregouCoragem = false;
+    imgCoragem.onload = () => { carregouCoragem = true; };
+    imgCoragem.onerror = () => { console.warn("Imagem 'coragem.jpg' não encontrada. Usando ícone reserva."); };
+    imgCoragem.src = 'coragem.jpg';
+
+    let imgEustacio = new Image();
+    let carregouEustacio = false;
+    imgEustacio.onload = () => { carregouEustacio = true; };
+    imgEustacio.onerror = () => { console.warn("Imagem 'eustacio.jpg' não encontrada. Usando ícone reserva."); };
+    imgEustacio.src = 'eustacio.jpg';
 
     // --- VARIÁVEIS DE ESTADO DO JOGO ---
     let vidaJogador = 100;
@@ -43,19 +82,19 @@
     let municao = 10;
     let municaoMaxima = 10;
 
-    // Tamanhos padronizados (Coragem grande)
+    // Tamanhos dos personagens no jogo (Coragem grande)
     const TAMANHO_CORAGEM = { largura: 130, altura: 130 };
     const TAMANHO_EUSTACIO = { largura: 160, altura: 160 }; // Maior por ser Boss
 
-    // --- LISTAS DE ELEMENTOS EM MOVIMENTO ---
-    let listaCoragens = []; // Aliados do Coragem que aparecem
-    let bossEustacio = null; // Guardará o Boss Eustácio quando surgir
+    // --- LISTAS E BOSS ---
+    let listaCoragens = [];
+    let bossEustacio = null;
 
     // --- 1. LÓGICA DE SPAWN DO CORAGEM (AUMENTA QUANDO PERDE VIDA) ---
     function tentarGerarCoragem() {
-      // Quanto menor a vida, menor o tempo entre spawns (aparece mais Coragem)
-      let taxaVidaPerdida = 1 - (vidaJogador / vidaJogadorMaxima); // 0 a 1
-      let chanceSpawn = 0.3 + (taxaVidaPerdida * 0.5); // Aumenta a chance se estiver com vida baixa
+      // Quanto menor a vida, mais Coragens aparecem vindo na tela
+      let taxaVidaPerdida = 1 - (vidaJogador / vidaJogadorMaxima);
+      let chanceSpawn = 0.3 + (taxaVidaPerdida * 0.5);
 
       if (Math.random() < chanceSpawn) {
         listaCoragens.push({
@@ -63,61 +102,81 @@
           y: -130, // Começa no topo vindo em direção à tela
           largura: TAMANHO_CORAGEM.largura,
           altura: TAMANHO_CORAGEM.altura,
-          velocidade: 2 // Velocidade normal de avanço
+          velocidade: 1.8
         });
       }
     }
 
-    // Tenta gerar Coragens periodicamente
     setInterval(tentarGerarCoragem, 2000);
 
-    // --- 2. LÓGICA DO BOSS EUSTÁCIO (DEVAGAR E COM MUITA RESISTÊNCIA) ---
+    // --- 2. LÓGICA DO BOSS EUSTÁCIO (VEM DEVAGAR E COM MUITA RESISTÊNCIA) ---
     function criarBossEustacio() {
       bossEustacio = {
-        x: Math.random() * (canvas.width - TAMANHO_EUSTACIO.largura),
-        y: -160, // Começa fora da tela e vem vindo
+        x: (canvas.width / 2) - (TAMANHO_EUSTACIO.largura / 2),
+        y: -160, // Começa acima da tela e vem vindo
         largura: TAMANHO_EUSTACIO.largura,
         altura: TAMANHO_EUSTACIO.altura,
-        velocidade: 0.6, // Vem vindo bem devagar
-        vida: 500,       // Muita resistência (Boss)
+        velocidade: 0.5, // Vem bem devagar
+        vida: 500,       // Muita resistência de Boss
         vidaMaxima: 500
       };
     }
 
-    // Exemplo: Gera o Boss Eustácio após 5 segundos de jogo
-    setTimeout(criarBossEustacio, 5000);
+    // Boss Eustácio entra após 3 segundos
+    setTimeout(criarBossEustacio, 3000);
 
-    // --- 3. FUNÇÃO DE RECARGA (RECARREGA MUNIÇÃO E RECUPERA VIDA) ---
+    // --- 3. RECARGA DE MUNIÇÃO E VIDA ---
     function recarregarETratarVida() {
       municao = municaoMaxima;
       
-      // Quando recarrega, recupera uma parte da vida
+      // Ao recarregar, recupera vida também
       vidaJogador += 30;
       if (vidaJogador > vidaJogadorMaxima) {
-        vidaJogador = vidaJogadorMaxima; // Não ultrapassa o limite
+        vidaJogador = vidaJogadorMaxima;
       }
-      console.log("Munição recarregada e vida recuperada para: " + vidaJogador);
     }
 
-    // Exemplo: Tecla 'R' para recarregar munição e vida
     window.addEventListener('keydown', (e) => {
       if (e.key === 'r' || e.key === 'R') {
         recarregarETratarVida();
       }
     });
 
+    // --- INTERFACE DE VIDA E MUNIÇÃO ---
+    function desenharHUD() {
+      // Vida do Jogador
+      ctx.fillStyle = '#ff4444';
+      ctx.fillRect(15, 15, 200, 20);
+      ctx.fillStyle = '#00e676';
+      ctx.fillRect(15, 15, (200 * (vidaJogador / vidaJogadorMaxima)), 20);
+      ctx.strokeStyle = '#ffffff';
+      ctx.strokeRect(15, 15, 200, 20);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px Arial';
+      ctx.fillText(`VIDA: ${vidaJogador}/${vidaJogadorMaxima}`, 20, 30);
+
+      // Munição e Instrução
+      ctx.fillStyle = '#ffcc00';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`MUNIÇÃO: ${municao}/${municaoMaxima}`, 15, 55);
+      ctx.fillStyle = '#aaa';
+      ctx.font = '12px Arial';
+      ctx.fillText(`Pressione [R] para recarregar munição & vida`, 15, 75);
+    }
+
     // --- LOOP PRINCIPAL DO JOGO ---
     function atualizar() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // --- MOVIMENTAR E DESENHAR OUTROS CORAGENS QUE VÊM VINDO ---
+      // --- MOVIMENTAR E DESENHAR OS CORAGENS QUE VÊM VINDO ---
       for (let i = 0; i < listaCoragens.length; i++) {
         let c = listaCoragens[i];
         c.y += c.velocidade; // Avança para baixo
 
-        ctx.drawImage(imgCoragem, c.x, c.y, c.largura, c.altura);
+        let imgDraw = carregouCoragem ? imgCoragem : fallbackCoragem;
+        ctx.drawImage(imgDraw, c.x, c.y, c.largura, c.altura);
 
-        // Se sair da tela, remove
         if (c.y > canvas.height) {
           listaCoragens.splice(i, 1);
           i--;
@@ -126,26 +185,31 @@
 
       // --- MOVIMENTAR E DESENHAR O BOSS EUSTÁCIO ---
       if (bossEustacio) {
-        // Eustácio vem vindo devagar
-        bossEustacio.y += bossEustacio.velocidade;
+        bossEustacio.y += bossEustacio.velocidade; // Vem vindo devagar
 
-        // Desenha a foto do Eustácio
+        let imgBossDraw = carregouEustacio ? imgEustacio : fallbackEustacio;
         ctx.drawImage(
-          imgEustacio, 
+          imgBossDraw, 
           bossEustacio.x, 
           bossEustacio.y, 
           bossEustacio.largura, 
           bossEustacio.altura
         );
 
-        // Barra de Vida Resistente em cima dele
-        ctx.fillStyle = 'red';
-        ctx.fillRect(bossEustacio.x, bossEustacio.y - 12, bossEustacio.largura, 10);
+        // Barra de Vida Resistente do Boss (Acima dele)
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(bossEustacio.x, bossEustacio.y - 15, bossEustacio.largura, 10);
         
-        ctx.fillStyle = 'green';
-        let larguraVida = (bossEustacio.largura * (bossEustacio.vida / bossEustacio.vidaMaxima));
-        ctx.fillRect(bossEustacio.x, bossEustacio.y - 12, larguraVida, 10);
+        ctx.fillStyle = '#00ff00';
+        let larguraVidaBoss = (bossEustacio.largura * (bossEustacio.vida / bossEustacio.vidaMaxima));
+        ctx.fillRect(bossEustacio.x, bossEustacio.y - 15, larguraVidaBoss, 10);
+
+        ctx.strokeStyle = '#000000';
+        ctx.strokeRect(bossEustacio.x, bossEustacio.y - 15, bossEustacio.largura, 10);
       }
+
+      // Desenha HUD na tela
+      desenharHUD();
 
       requestAnimationFrame(atualizar);
     }

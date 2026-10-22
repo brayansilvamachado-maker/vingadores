@@ -270,22 +270,62 @@ function endGame() {
     reloadPrompt.classList.add('hide');
 }
 
-// 1. Carrega as fotos
+// 1. Carrega a foto/imagem do Coragem
 const imgCoragem = new Image();
-imgCoragem.src = 'coragem.png'; // coloque o nome correto da sua foto
+imgCoragem.src = 'coragem.png'; // Nome da foto do seu Coragem
 
+// 2. Define o tamanho GRANDE do Coragem (ajuste 120, 150, etc., até ficar do tamanho ideal)
+const TAMANHO_CORAGEM = {
+  largura: 140, // Aumente este valor se quiser ainda maior
+  altura: 140
+};
+
+// 3. No seu loop de desenho (função render/draw/atualizar):
+ctx.drawImage(
+  imgCoragem, 
+  coragem.x, 
+  coragem.y, 
+  TAMANHO_CORAGEM.largura, 
+  TAMANHO_CORAGEM.altura
+);
+
+// 1. Carrega a foto do Eustácio
 const imgEustacio = new Image();
-imgEustacio.src = 'eustacio.png'; // coloque o nome correto da sua foto do Eustácio
+imgEustacio.src = 'eustacio.png'; // Nome da foto do seu Eustácio
 
-// 2. Define a largura e altura grandes para as fotos
-const LARGURA_FOTO = 150; // mude aqui para aumentar ou diminuir
-const ALTURA_FOTO = 150;  // mude aqui para aumentar ou diminuir
+// 2. Dados e tamanho do Boss Eustácio
+const bossEustacio = {
+  x: 300,             // Posição na tela
+  y: 50,
+  largura: 160,       // Tamanho de Boss (grande)
+  altura: 160,
+  vida: 100,          // Vida do Boss
+  vidaMaxima: 100,
+  ativo: true
+};
 
-// 3. Desenha na tela no tamanho ajustado
-function desenharPersonagens() {
-  // desenha o Coragem no novo tamanho
-  ctx.drawImage(imgCoragem, coragem.x, coragem.y, LARGURA_FOTO, ALTURA_FOTO);
+// 3. Função para desenhar APENAS o Eustácio Boss na tela (sem balão)
+function desenharBossEustacio() {
+  if (!bossEustacio.ativo) return;
 
-  // desenha o Eustácio no novo tamanho (substitui o quadrado)
-  ctx.drawImage(imgEustacio, eustacio.x, eustacio.y, LARGURA_FOTO, ALTURA_FOTO);
+  // Desenha a foto do Eustácio no jogo
+  ctx.drawImage(
+    imgEustacio, 
+    bossEustacio.x, 
+    bossEustacio.y, 
+    bossEustacio.largura, 
+    bossEustacio.altura
+  );
+
+  // Barra de vida simples acima da cabeça dele (sem balão de texto)
+  ctx.fillStyle = 'red';
+  ctx.fillRect(bossEustacio.x, bossEustacio.y - 15, bossEustacio.largura, 8);
+  
+  ctx.fillStyle = 'green';
+  ctx.fillRect(
+    bossEustacio.x, 
+    bossEustacio.y - 15, 
+    (bossEustacio.largura * (bossEustacio.vida / bossEustacio.vidaMaxima)), 
+    8
+  );
 }

@@ -285,3 +285,36 @@ body {
 .hide { display: none !important; }
 @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } 
 }
+
+/* Container do jogo onde tudo fica dentro */
+#jogo-container {
+  position: relative;
+  width: 800px;  /* Ajuste para o tamanho da sua tela de jogo */
+  height: 600px;
+  overflow: hidden;
+  background-color: #000;
+}
+
+/* Foto do Coragem em tamanho grande */
+#coragem {
+  position: absolute;
+  width: 140px;  /* Tamanho grande do Coragem */
+  height: 140px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* Foto do Eustácio como BOSS */
+#eustacio {
+  position: absolute;
+  width: 160px;  /* Tamanho de Boss do Eustácio */
+  height: 160px;
+  top: 30px;     /* Fica no topo da tela */
+  left: 50%;
+  transform: translateX(-50%);
+  display: block !important; /* Força a imagem a aparecer na tela */
+  opacity: 1 !important;     /* Garante que não está transparente */
+  z-index: 10;
+}

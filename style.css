@@ -318,3 +318,15 @@ body {
   opacity: 1 !important;     /* Garante que não está transparente */
   z-index: 10;
 }
+
+.foto-personagem {
+  width: 120px;  /* Tamanho exato da foto do Antônio */
+  height: 120px;
+  object-fit: cover;
+}
+
+.foto-boss {
+  width: 150px;  /* Tamanho do Eustácio Boss */
+  height: 150px;
+  object-fit: cover;
+}

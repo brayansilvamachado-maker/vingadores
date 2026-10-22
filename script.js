@@ -272,7 +272,7 @@ function endGame() {
 
 // 1. Carrega a foto/imagem do Coragem
 const imgCoragem = new Image();
-imgCoragem.src = 'coragem.png'; // Nome da foto do seu Coragem
+imgCoragem.src = 'coragem.jpg'; // Nome da foto do seu Coragem
 
 // 2. Define o tamanho GRANDE do Coragem (ajuste 120, 150, etc., até ficar do tamanho ideal)
 const TAMANHO_CORAGEM = {
@@ -291,7 +291,7 @@ ctx.drawImage(
 
 // 1. Carrega a foto do Eustácio
 const imgEustacio = new Image();
-imgEustacio.src = 'eustacio.png'; // Nome da foto do seu Eustácio
+imgEustacio.src = 'eustacio.jpg'; // Nome da foto do seu Eustácio
 
 // 2. Dados e tamanho do Boss Eustácio
 const bossEustacio = {
@@ -328,4 +328,78 @@ function desenharBossEustacio() {
     (bossEustacio.largura * (bossEustacio.vida / bossEustacio.vidaMaxima)), 
     8
   );
+}
+
+function verificarEAtirar() {
+  if (municao > 0) {
+    // Dispara o tiro normal
+    atirar();
+    municao--;
+    
+    // Se acabou a munição com esse tiro, recarrega sozinho
+    if (municao === 0) {
+      setTimeout(() => {
+        municao = municaoMaxima;
+        
+        // Recupera vida ao recarregar
+        vidaJogador += 30;
+        if (vidaJogador > vidaJogadorMaxima) {
+          vidaJogador = vidaJogadorMaxima;
+        }
+      }, 1000); // 1 segundo para recarregar automaticamente
+    }
+  }
+}
+
+function gerarVariosCoragens() {
+  // Quanto menor a sua vida, mais Coragens surgem no mesmo instante
+  let quantidadeParaCriar = 1;
+  let taxaVidaPerdida = 1 - (vidaJogador / vidaJogadorMaxima);
+
+  if (taxaVidaPerdida > 0.4) {
+    quantidadeParaCriar = 2; // Aparecem 2 de uma vez
+  }
+  if (taxaVidaPerdida > 0.7) {
+    quantidadeParaCriar = 3; // Aparecem 3 de uma vez quando a vida está bem baixa
+  }
+
+  for (let i = 0; i < quantidadeParaCriar; i++) {
+    listaCoragens.push({
+      x: Math.random() * (canvas.width - 120),
+      y: -120 - (i * 40), // Surgem em posições variadas no topo e vêm descendo
+      largura: 120,       // Tamanho da foto do Antônio
+      altura: 120,
+      velocidade: 2
+    });
+  }
+}
+
+// Gera os Coragens na partida periodicamente
+setInterval(gerarVariosCoragens, 1800);
+
+// Cria o Boss Eustácio
+let bossEustacio = {
+  x: (canvas.width / 2) - 75,
+  y: -150,        // Começa fora no topo e vem vindo
+  largura: 150,   // Tamanho de Boss
+  altura: 150,
+  velocidade: 0.5, // Vem vindo bem devagar
+  vida: 600,       // Bastante resistência
+  vidaMaxima: 600
+};
+
+// No seu loop do jogo (atualizar/draw), adicione o movimento dele:
+function atualizarBoss() {
+  if (bossEustacio) {
+    bossEustacio.y += bossEustacio.velocidade; // Avança devagar para baixo
+
+    // Desenha a foto do Eustácio no tamanho de Boss
+    ctx.drawImage(imgEustacio, bossEustacio.x, bossEustacio.y, bossEustacio.largura, bossEustacio.altura);
+
+    // Barra de vida em cima dele
+    ctx.fillStyle = 'red';
+    ctx.fillRect(bossEustacio.x, bossEustacio.y - 12, bossEustacio.largura, 8);
+    ctx.fillStyle = 'green';
+    ctx.fillRect(bossEustacio.x, bossEustacio.y - 12, (bossEustacio.largura * (bossEustacio.vida / bossEustacio.vidaMaxima)), 8);
+  }
 }

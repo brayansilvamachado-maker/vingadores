@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defenda a Fazenda do Coragem!</title>
+    <title>Defenda a Fazenda!</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- CONTAINER INTEGRADO IGUAL AO PRINT -->
     <div id="main-wrapper">
-        
-        <!-- ÁREA CENTRAL DO JOGO -->
         <div id="game-container">
-            <!-- TÍTULO SUPERIOR INTERNALIZADO -->
+            <!-- Título Superior -->
             <div id="game-header">
                 <div class="sub-title">FEIRA DE PROFISSÕES • DESENVOLVIMENTO DE SISTEMAS</div>
-                <div class="main-title">MATE A AULA DO CORAGEM!</div>
+                <div class="main-title">DEFENDA A FAZENDA!</div>
             </div>
 
-            <!-- HUD INTERNO SUPERIOR -->
+            <!-- HUD Interno Superior -->
             <div id="hud">
                 <div class="hud-group">
                     <div class="hud-box">PONTOS<br><span id="score-val">000000</span></div>
@@ -27,65 +24,50 @@
                     <div class="hud-box">ONDA<br><span id="wave-val">1</span></div>
                 </div>
                 <div class="hud-group">
-                    <div class="hud-box highlight">VIDA<br><span id="hp-val">100</span></div>
+                    <div class="hud-box highlight">
+                        VIDA
+                        <div class="player-hp-bar">
+                            <div id="player-hp-fill" class="player-hp-fill"></div>
+                        </div>
+                        <span id="hp-val">100</span>
+                    </div>
                     <div class="hud-box highlight">MUNIÇÃO<br><span id="ammo-val">6 / ∞</span></div>
                 </div>
             </div>
 
-            <!-- Efeito de Flash do Tiro -->
+            <!-- Flash do Tiro -->
             <div id="shoot-flash" class="flash"></div>
             
-            <!-- Texto informativo de Ondas no Centro -->
-            <div id="wave-banner" class="wave-announcement hide">ONDA 1<br><span>Defenda o meio do nada!</span></div>
-            <div id="reload-prompt" class="reload-text hide">CLIQUE COM O BOTÃO DIREITO PARA RECARREGAR!</div>
+            <!-- Mensagens Centrais -->
+            <div id="wave-banner" class="wave-announcement hide">ONDA 1<br><span>Defenda a fazenda!</span></div>
+            <div id="boss-card" class="boss-announcement hide">
+                <h2 id="boss-title">CACHORRO IDIOTA!</h2>
+                <p id="boss-subtitle">O Eustáquio apareceu!</p>
+            </div>
+            <div id="reload-prompt" class="reload-text hide">RECARREGANDO...</div>
 
-            <!-- ARMA FIXA INFERIOR -->
-            <div id="player-weapon"></div>
+            <!-- Arma do Jogador (Mão Pixel Art + Pistola) -->
+            <div id="player-weapon">
+                <div class="hand"></div>
+                <div class="gun-handle"></div>
+                <div class="gun-body"></div>
+            </div>
 
             <!-- Tela Inicial -->
             <div id="start-screen" class="screen">
-                <h1>MATE A AULA DO CORAGEM!</h1>
-                <p>Mire e atire com o Clique Esquerdo. Recarregue usando o Botão Direito.</p>
-                <button id="play-button" class="btn-play">MATA AULA</button>
+                <h1>DEFENDA A FAZENDA!</h1>
+                <p>Atire nos alvos com o Clique Esquerdo. A munição recarrega automaticamente ao zerar!</p>
+                <button id="play-button" class="btn-play">JOGAR</button>
             </div>
 
             <!-- Tela de Game Over -->
             <div id="gameover-screen" class="screen hide">
                 <h1>FIM DE JOGO!</h1>
-                <p>O Coragem te pegou fora da sala de aula!</p>
+                <p>A fazenda foi invadida!</p>
                 <p>Pontuação Final: <span id="final-score" style="color: #ffcc00;">0</span></p>
                 <button id="retry-button" class="btn-play">TENTAR DE NOVO</button>
             </div>
         </div>
-
-        <!-- PAINEL DE RANKING LATERAL DIREITO -->
-        <div id="sidebar-ranking">
-            <div class="ranking-title">RANKING<br><h2>MELHORES DA FEIRA</h2></div>
-            
-            <div class="podium-container">
-                <div class="podium-box p2"><div>2º</div><span class="podium-score">0</span></div>
-                <div class="podium-box p1"><div>1º</div><span class="podium-score">0</span></div>
-                <div class="podium-box p3"><div>3º</div><span class="podium-score">0</span></div>
-            </div>
-
-            <table class="ranking-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nome</th>
-                        <th>Pontos</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="3" class="empty-table">Ainda não há pontuações.</td></tr>
-                </tbody>
-            </table>
-
-            <div class="sidebar-footer">
-                <strong>OBS:</strong> O placar fica salvo neste navegador. Ideal para usar na feira.
-            </div>
-        </div>
-
     </div>
 
     <script src="script.js"></script>
